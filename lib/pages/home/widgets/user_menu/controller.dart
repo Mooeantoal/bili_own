@@ -51,7 +51,7 @@ class UserMenuController extends GetxController {
 
   // }
   Future<void> loadOldFace() async {
-    var box = BiliYouStorage.user;
+    var box = BiliOwnStorage.user;
     faceUrl.value = box.get("userFace") ?? ApiConstants.noface;
     return;
   }
@@ -76,13 +76,13 @@ class UserMenuController extends GetxController {
   onLogout() async {
     HttpUtils.cookieManager.cookieJar.deleteAll();
     resetRX();
-    var box = BiliYouStorage.user;
+    var box = BiliOwnStorage.user;
     box.put(UserStorageKeys.hasLogin, false);
     cacheManager.emptyCache();
   }
 
   Future<bool> hasLogin() async {
-    return BiliYouStorage.user.get(UserStorageKeys.hasLogin) ?? false;
+    return BiliOwnStorage.user.get(UserStorageKeys.hasLogin) ?? false;
   }
 
   // @override

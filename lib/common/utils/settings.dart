@@ -14,24 +14,24 @@ import 'package:url_launcher/url_launcher_string.dart';
 
 class SettingsUtil {
   static ThemeMode get currentThemeMode {
-    var index = BiliYouStorage.settings.get(SettingsStorageKeys.themeMode,
+    var index = BiliOwnStorage.settings.get(SettingsStorageKeys.themeMode,
         defaultValue: ThemeMode.system.index);
     return ThemeMode.values[index];
   }
 
   static changeThemeMode(ThemeMode themeMode) {
-    BiliYouStorage.settings.put(SettingsStorageKeys.themeMode, themeMode.index);
+    BiliOwnStorage.settings.put(SettingsStorageKeys.themeMode, themeMode.index);
     Get.changeThemeMode(themeMode);
   }
 
   static BiliTheme get currentTheme {
-    var index = BiliYouStorage.settings.get(SettingsStorageKeys.biliTheme,
+    var index = BiliOwnStorage.settings.get(SettingsStorageKeys.biliTheme,
         defaultValue: BiliTheme.dynamic.index);
     return BiliTheme.values[index];
   }
 
   static changeTheme(BiliTheme theme) {
-    BiliYouStorage.settings.put(SettingsStorageKeys.biliTheme, theme.index);
+    BiliOwnStorage.settings.put(SettingsStorageKeys.biliTheme, theme.index);
     //不知道为什么Get.changeTheme()暗色不能更新
     //只能强制更新
     Get.forceAppUpdate();
@@ -118,27 +118,27 @@ class SettingsUtil {
 
   //获取偏好的视频画质
   static VideoQuality getPreferVideoQuality() {
-    return VideoQualityCode.fromCode(BiliYouStorage.settings.get(
+    return VideoQualityCode.fromCode(BiliOwnStorage.settings.get(
         SettingsStorageKeys.preferVideoQuality,
         defaultValue: VideoQuality.values.last.code));
   }
 
   //保存偏好视频画质
   static Future<void> putPreferVideoQuality(VideoQuality quality) async {
-    await BiliYouStorage.settings
+    await BiliOwnStorage.settings
         .put(SettingsStorageKeys.preferVideoQuality, quality.code);
   }
 
   //获取偏好的视频音质
   static AudioQuality getPreferAudioQuality() {
-    return AudioQualityCode.fromCode(BiliYouStorage.settings.get(
+    return AudioQualityCode.fromCode(BiliOwnStorage.settings.get(
         SettingsStorageKeys.preferAudioQuality,
         defaultValue: AudioQuality.values.last.code));
   }
 
   //保存偏好视频音质
   static Future<void> putPreferAudioQuality(AudioQuality quality) async {
-    await BiliYouStorage.settings
+    await BiliOwnStorage.settings
         .put(SettingsStorageKeys.preferAudioQuality, quality.code);
   }
 }

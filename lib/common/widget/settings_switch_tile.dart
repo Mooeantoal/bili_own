@@ -24,10 +24,10 @@ class SettingsSwitchTile extends StatelessWidget {
       subtitle: Text(subTitle),
       trailing: StatefulBuilder(builder: (context, setState) {
         return Switch(
-          value: BiliYouStorage.settings
+          value: BiliOwnStorage.settings
               .get(settingsKey, defaultValue: defualtValue),
           onChanged: (value) async {
-            await BiliYouStorage.settings.put(settingsKey, value);
+            await BiliOwnStorage.settings.put(settingsKey, value);
             setState(() {});
             apply?.call();
           },

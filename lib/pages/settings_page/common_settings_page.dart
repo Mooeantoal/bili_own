@@ -25,14 +25,14 @@ class CommonSettingsPage extends StatelessWidget {
           SettingsRadiosTile(
             title: '推荐列数',
             subTitle: '首页推荐卡片的列数',
-            buildTrailingText: () => BiliYouStorage.settings
+            buildTrailingText: () => BiliOwnStorage.settings
                 .get(SettingsStorageKeys.recommendColumnCount, defaultValue: 2)
                 .toString(),
             itemNameValue: const {'1': 1, '2': 2, '3': 3, '4': 4, '5': 5},
-            buildGroupValue: () => BiliYouStorage.settings
+            buildGroupValue: () => BiliOwnStorage.settings
                 .get(SettingsStorageKeys.recommendColumnCount, defaultValue: 2),
             applyValue: (value) async {
-              await BiliYouStorage.settings
+              await BiliOwnStorage.settings
                   .put(SettingsStorageKeys.recommendColumnCount, value);
               Get.find<RecommendController>().recommendColumnCount = value;
               await Get.find<RecommendController>()
@@ -102,13 +102,13 @@ class CommonSettingsPage extends StatelessWidget {
           SettingsRadiosTile(
             title: '偏好视频编码',
             subTitle: '默认偏好选择的视频编码',
-            buildTrailingText: () => BiliYouStorage.settings
+            buildTrailingText: () => BiliOwnStorage.settings
                 .get(SettingsStorageKeys.preferVideoCodec, defaultValue: 'hev'),
             itemNameValue: const {'hev': 'hev', 'avc': 'avc'},
-            buildGroupValue: () => BiliYouStorage.settings
+            buildGroupValue: () => BiliOwnStorage.settings
                 .get(SettingsStorageKeys.preferVideoCodec, defaultValue: 'hev'),
             applyValue: (value) {
-              BiliYouStorage.settings
+              BiliOwnStorage.settings
                   .put(SettingsStorageKeys.preferVideoCodec, value);
             },
           ),

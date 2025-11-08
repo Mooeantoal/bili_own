@@ -112,7 +112,7 @@ class _AppearanceSettingsPageState extends State<AppearanceSettingsPage> {
           const SettingsLabel(text: '字体'),
           ListTile(
             title: const Text('缩放倍数'),
-            subtitle: Text(BiliYouStorage.settings
+            subtitle: Text(BiliOwnStorage.settings
                 .get(SettingsStorageKeys.textScaleFactor, defaultValue: 1.0)
                 .toString()),
             onTap: () => showDialog(
@@ -121,14 +121,14 @@ class _AppearanceSettingsPageState extends State<AppearanceSettingsPage> {
                 title: const Text('缩放倍数'),
                 children: [
                   Slider(
-                    value: BiliYouStorage.settings.get(
+                    value: BiliOwnStorage.settings.get(
                         SettingsStorageKeys.textScaleFactor,
                         defaultValue: 1.0),
                     min: 0.5,
                     max: 2,
                     divisions: 6,
                     onChanged: (value) async {
-                      await BiliYouStorage.settings
+                      await BiliOwnStorage.settings
                           .put(SettingsStorageKeys.textScaleFactor, value);
                       await Get.forceAppUpdate();
                     },

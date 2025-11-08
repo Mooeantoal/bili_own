@@ -62,7 +62,7 @@ Future<void> startCaptcha(
 ///清除头像缓存
 Future<void> onLoginSuccess(
     LoginUserInfo userInfo, LoginUserStat userStat) async {
-  var box = BiliYouStorage.user;
+  var box = BiliOwnStorage.user;
   await CacheManager(Config(CacheKeys.userFaceKey)).emptyCache();
   await box.put(UserStorageKeys.hasLogin, true);
   await box.put(UserStorageKeys.userFace, userInfo.avatarUrl);

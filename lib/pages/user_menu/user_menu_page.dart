@@ -81,7 +81,7 @@ class UserMenuPageContent extends GetView<UserMenuController> {
                                 cacheManager: controller.cacheManager,
                                 width: 80,
                                 height: 80,
-                                imageUrl: BiliYouStorage.user.get(UserStorageKeys.userFace,
+                                imageUrl: BiliOwnStorage.user.get(UserStorageKeys.userFace,
                                     defaultValue: controller.faceUrl.value),
                                 placeholder: () => const SizedBox(
                                   width: 80,

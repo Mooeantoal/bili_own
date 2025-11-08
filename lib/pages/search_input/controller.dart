@@ -118,7 +118,7 @@ class SearchInputPageController extends GetxController {
 
 //获取/刷新历史搜索词控件
   _refreshHistoryWord() async {
-    var box = BiliYouStorage.history;
+    var box = BiliOwnStorage.history;
     List<Widget> widgetList = [];
     List<dynamic> list = box.get("searchHistory", defaultValue: <String>[]);
     for (String i in list.reversed) {
@@ -144,7 +144,7 @@ class SearchInputPageController extends GetxController {
 
 //保存搜索词
   _saveSearchedWord(String keyWord) async {
-    var box = BiliYouStorage.history;
+    var box = BiliOwnStorage.history;
     List<dynamic> list = box.get("searchHistory", defaultValue: <String>[]);
 //不存在相同的词就放进去
     if (!list.contains(keyWord)) {
@@ -156,14 +156,14 @@ class SearchInputPageController extends GetxController {
 
 //删除所有搜索历史
   clearAllSearchedWords() async {
-    var box = BiliYouStorage.history;
+    var box = BiliOwnStorage.history;
     box.put("searchHistory", <String>[]);
     _refreshHistoryWord(); //刷新历史记录控件
   }
 
 //删除历史记录某个词
   _deleteSearchedWord(String word) async {
-    var box = BiliYouStorage.history;
+    var box = BiliOwnStorage.history;
     List<dynamic> list = box.get("searchHistory", defaultValue: <String>[]);
     list.remove(word);
     box.put("searchHistory", list);
@@ -260,6 +260,8 @@ class SearchInputPageController extends GetxController {
     }
   }
 }
+
+
 
 
 

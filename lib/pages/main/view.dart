@@ -23,7 +23,7 @@ class _MainPageState extends State<MainPage> {
   void initState() {
     BiliUrlScheme.init(context);
     //自动检查更新
-    if (BiliYouStorage.settings
+    if (BiliOwnStorage.settings
         .get(SettingsStorageKeys.autoCheckUpdate, defaultValue: true)) {
       SettingsUtil.checkUpdate(context, showSnackBar: false);
     }

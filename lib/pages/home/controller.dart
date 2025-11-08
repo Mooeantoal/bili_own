@@ -51,7 +51,7 @@ class HomeController extends GetxController {
   }
 
   Future<void> loadOldFace() async {
-    var box = BiliYouStorage.user;
+    var box = BiliOwnStorage.user;
     faceUrl.value = box.get(UserStorageKeys.userFace) ?? ApiConstants.noface;
   }
 }

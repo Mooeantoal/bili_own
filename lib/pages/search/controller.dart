@@ -45,7 +45,7 @@ class SSearchController extends GetxController {
     super.onInit();
     // 初始化历史记录
     historyList = List<String>.from(
-      BiliYouStorage.history.get("searchHistory", defaultValue: <String>[]) ?? [],
+      BiliOwnStorage.history.get("searchHistory", defaultValue: <String>[]) ?? [],
     ).obs;
 
     if (searchSuggestion) {
@@ -108,7 +108,7 @@ class SSearchController extends GetxController {
       historyList
         ..remove(controller.text)
         ..insert(0, controller.text);
-      BiliYouStorage.history.put('searchHistory', historyList);
+      BiliOwnStorage.history.put('searchHistory', historyList);
     }
 
     searchFocusNode.unfocus();
@@ -162,12 +162,12 @@ class SSearchController extends GetxController {
 
   void onLongSelect(String word) {
     historyList.remove(word);
-    BiliYouStorage.history.put('searchHistory', historyList);
+    BiliOwnStorage.history.put('searchHistory', historyList);
   }
 
   void onClearHistory() {
     historyList.clear();
-    BiliYouStorage.history.put('searchHistory', []);
+    BiliOwnStorage.history.put('searchHistory', []);
   }
 
   @override

@@ -292,7 +292,7 @@ class _SearchPageState extends State<SearchPage> {
                               enable = !enable;
                               _searchController.recordSearchHistory.value =
                                   enable;
-                              BiliYouStorage.settings.put(
+                              BiliOwnStorage.settings.put(
                                 'recordSearchHistory',
                                 enable,
                               );

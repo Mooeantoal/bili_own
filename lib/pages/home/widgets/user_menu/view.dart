@@ -46,7 +46,7 @@ class UserMenuPage extends GetView<UserMenuController> {
                           builder: (context, snapshot) {
                             if (snapshot.connectionState == ConnectionState.done) {
                               return ValueListenableBuilder(
-                                valueListenable: BiliYouStorage.user
+                                valueListenable: BiliOwnStorage.user
                                     .listenable(keys: [UserStorageKeys.userFace]),
                                 builder: (context, value, child) {
                                   return cn.CachedNetworkImage(
