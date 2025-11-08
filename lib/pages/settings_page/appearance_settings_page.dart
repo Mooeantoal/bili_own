@@ -113,7 +113,7 @@ class _AppearanceSettingsPageState extends State<AppearanceSettingsPage> {
           ListTile(
             title: const Text('缩放倍数'),
             subtitle: Text(BiliOwnStorage.settings
-                .get(SettingsStorageKeys.textScaleFactor, defaultValue: 1.0)
+                .get(SettingsStorageKeys.textScaleFactor, defaultValue: 0.75)
                 .toString()),
             onTap: () => showDialog(
               context: context,
@@ -123,7 +123,7 @@ class _AppearanceSettingsPageState extends State<AppearanceSettingsPage> {
                   Slider(
                     value: BiliOwnStorage.settings.get(
                         SettingsStorageKeys.textScaleFactor,
-                        defaultValue: 1.0),
+                        defaultValue: 0.75),
                     min: 0.5,
                     max: 2,
                     divisions: 6,

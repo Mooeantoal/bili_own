@@ -52,10 +52,10 @@ class _SearchResultPageState extends State<SearchResultPage>
         shape: UnderlineInputBorder(
             borderSide: BorderSide(color: Theme.of(context).dividerColor)),
         title: Container(
-          padding: const EdgeInsets.all(8),
+          padding: const EdgeInsets.all(4),
           decoration: BoxDecoration(
             color: Theme.of(context).colorScheme.surfaceVariant,
-            borderRadius: BorderRadius.circular(20),
+            borderRadius: BorderRadius.circular(30),
           ),
           child: Row(
             children: [
@@ -65,6 +65,7 @@ class _SearchResultPageState extends State<SearchResultPage>
                 child: TextField(
                   focusNode: _focusNode,
                   controller: _textController,
+                  style: const TextStyle(fontSize: 14),
                   onSubmitted: (value) {
                     // 直接在当前页面进行新的搜索
                     if (value.trim().isNotEmpty) {
@@ -85,6 +86,7 @@ class _SearchResultPageState extends State<SearchResultPage>
                   decoration: InputDecoration(
                     border: InputBorder.none,
                     hintText: '搜索',
+                    contentPadding: const EdgeInsets.symmetric(vertical: 8),
                     suffixIcon: IconButton(
                       icon: const Icon(Icons.clear, size: 18),
                       onPressed: () {

@@ -78,7 +78,10 @@ class SearchApi {
     }
     for (var i in response.result!.tag!) {
       list.add(
-          SearchSuggestItem(showWord: i.name ?? "", realWord: i.value ?? ""));
+          SearchSuggestItem(
+              showWord: StringFormatUtils.replaceAllHtmlEntitiesToCharacter(
+                  StringFormatUtils.keyWordTitleToRawTitle(i.name ?? "")),
+              realWord: i.value ?? ""));
     }
     return list;
   }

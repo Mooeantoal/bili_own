@@ -54,7 +54,7 @@ class MyApp extends StatelessWidget {
                       textScaleFactor: MediaQuery.of(context).textScaleFactor *
                           BiliOwnStorage.settings.get(
                               SettingsStorageKeys.textScaleFactor,
-                              defaultValue: 1.0)),
+                              defaultValue: 0.75)),
                   child: child));
     }));
   }

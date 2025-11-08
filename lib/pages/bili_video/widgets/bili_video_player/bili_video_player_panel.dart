@@ -147,9 +147,11 @@ class _BiliVideoPlayerPanelState extends State<BiliVideoPlayerPanel> {
           //双击暂停/播放
           if (widget.controller._isPlayerPlaying) {
             widget.controller._biliVideoPlayerController.pause();
+            widget.controller._isPlayerPlaying = false;
             widget.controller._show = true;
           } else {
             widget.controller._biliVideoPlayerController.play();
+            widget.controller._isPlayerPlaying = true;
             widget.controller._show = false;
           }
           setState(() {});
@@ -451,6 +453,7 @@ class _BiliVideoPlayerPanelState extends State<BiliVideoPlayerPanel> {
                                       await widget
                                           .controller._biliVideoPlayerController
                                           .pause();
+                                      widget.controller._isPlayerPlaying = false;
                                     } else {
                                       if (widget
                                           .controller
@@ -465,10 +468,9 @@ class _BiliVideoPlayerPanelState extends State<BiliVideoPlayerPanel> {
                                         await widget.controller
                                             ._biliVideoPlayerController
                                             .play();
+                                        widget.controller._isPlayerPlaying = true;
                                       }
                                     }
-                                    widget.controller._isPlayerPlaying =
-                                        !widget.controller._isPlayerPlaying;
                                     setState(() {});
                                   },
                                   icon: Icon(iconData));
