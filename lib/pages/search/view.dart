@@ -47,7 +47,7 @@ class _SearchPageState extends State<SearchPage> {
               decoration: InputDecoration(
                 hintText: '请输入搜索关键词',
                 border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
+                  borderRadius: BorderRadius.circular(20), // 圆角设置
                 ),
                 suffixIcon: IconButton(
                   icon: const Icon(Icons.clear),

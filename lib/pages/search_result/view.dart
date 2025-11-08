@@ -44,7 +44,7 @@ class _SearchResultPageState extends State<SearchResultPage>
           padding: const EdgeInsets.all(8),
           decoration: BoxDecoration(
             color: Theme.of(context).colorScheme.surfaceVariant,
-            borderRadius: BorderRadius.circular(4),
+            borderRadius: BorderRadius.circular(20), // 圆角设置
           ),
           child: Row(
             children: [
@@ -54,8 +54,21 @@ class _SearchResultPageState extends State<SearchResultPage>
                 child: TextField(
                   controller: TextEditingController(text: widget.keyWord),
                   onSubmitted: (value) {
-                    // 点击搜索按钮或按回车键时跳转到新的搜索页面
-                    Get.to(() => SearchPage());
+                    // 点击搜索按钮或按回车键时直接在当前页面搜索，不跳转
+                    if (value.trim().isNotEmpty) {
+                      // 更新控制器中的关键字
+                      controller.updateSearchKeyword(value);
+                      // 更新各个tab页面的搜索关键字
+                      for (int i = 0; i < SearchType.values.length; i++) {
+                        try {
+                          final tabController = Get.find<SearchTabViewController>(
+                              tag: controller.getTabTagNameByIndex(i));
+                          tabController.updateSearchKeyword(value);
+                        } catch (e) {
+                          // 如果找不到控制器则忽略
+                        }
+                      }
+                    }
                   },
                   decoration: const InputDecoration(
                     border: InputBorder.none,
@@ -96,7 +109,7 @@ class _SearchResultPageState extends State<SearchResultPage>
         children: [
           for (var i in SearchType.values)
             SearchTabViewPage(
-              keyWord: widget.keyWord,
+              keyWord: controller.keyWord, // 使用控制器中的关键字
               searchType: i,
               tagName: controller.getTabTagNameByIndex(i.index),
             ),

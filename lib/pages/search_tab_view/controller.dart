@@ -242,6 +242,16 @@ class SearchTabViewController extends GetxController {
     }
   }
 
+  // 更新搜索关键字的方法
+  void updateSearchKeyword(String newKeyword) {
+    keyWord = newKeyword;
+    // 重置分页
+    currentPage = 1;
+    searchItems.clear();
+    // 刷新数据
+    onRefresh();
+  }
+
   @override
   void onInit() {
     Timer(const Duration(seconds: 1), () {

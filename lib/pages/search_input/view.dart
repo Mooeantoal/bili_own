@@ -141,7 +141,7 @@ class _SearchInputPageState extends State<SearchInputPage> {
     return AppBar(
         shape: UnderlineInputBorder(
             borderSide: BorderSide(color: Theme.of(context).dividerColor)),
-        // titleSpacing: 0,
+        automaticallyImplyLeading: false, // 取消返回键
         title: Row(
           children: [
             Expanded(

@@ -23,4 +23,10 @@ class SearchResultController extends GetxController
         length: 5, vsync: this, initialIndex: currentSelectedTabIndex);
     super.onInit();
   }
+  
+  // 更新搜索关键字的方法
+  void updateSearchKeyword(String newKeyword) {
+    keyWord = newKeyword;
+    update(); // 通知页面更新
+  }
 }

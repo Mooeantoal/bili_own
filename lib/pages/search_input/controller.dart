@@ -4,6 +4,7 @@ import 'package:bili_you/common/api/search_api.dart';
 import 'package:bili_you/common/models/local/search/hot_word_item.dart';
 import 'package:bili_you/common/models/local/search/search_suggest_item.dart';
 import 'package:bili_you/common/utils/bili_you_storage.dart';
+import 'package:bili_you/common/utils/string_format_utils.dart';
 import 'package:bili_you/pages/search_result/index.dart';
 import 'package:bili_you/pages/search_result/view.dart';
 import 'package:flutter/material.dart';
@@ -213,6 +214,10 @@ class SearchInputPageController extends GetxController {
     }
 
     try {
+      // 先处理HTML标签，将HTML实体转换为字符
+      String processedText = StringFormatUtils.replaceAllHtmlEntitiesToCharacter(
+          StringFormatUtils.keyWordTitleToRawTitle(text));
+
       final List<TextSpan> children = [];
       // 转义特殊字符，避免正则表达式错误
       final String escapedKeyword = RegExp.escape(keyword);
@@ -222,7 +227,7 @@ class SearchInputPageController extends GetxController {
         multiLine: false,
       );
 
-      text.splitMapJoin(
+      processedText.splitMapJoin(
         regExp,
         onMatch: (Match match) {
           children.add(
@@ -260,7 +265,3 @@ class SearchInputPageController extends GetxController {
     }
   }
 }
-
-
-
-
