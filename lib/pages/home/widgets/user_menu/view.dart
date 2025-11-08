@@ -1,15 +1,15 @@
-import 'package:bili_you/common/utils/bili_you_storage.dart';
-import 'package:bili_you/common/widget/cached_network_image.dart';
-import 'package:bili_you/pages/about/about_page.dart';
-import 'package:bili_you/pages/history/history_page.dart';
-import 'package:bili_you/pages/login/web_login/view.dart';
-import 'package:bili_you/pages/settings_page/settings_page.dart';
+import 'package:bili_own/common/utils/bili_own_storage.dart';
+import 'package:bili_own/common/widget/cached_network_image.dart';
+import 'package:bili_own/pages/about/about_page.dart';
+import 'package:bili_own/pages/history/history_page.dart';
+import 'package:bili_own/pages/login/web_login/view.dart';
+import 'package:bili_own/pages/settings_page/settings_page.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:cached_network_image/cached_network_image.dart' as cn;
 import 'package:hive_flutter/hive_flutter.dart';
 
-import '../../../../common/utils/bili_you_storage.dart';
+import '../../../../common/utils/bili_own_storage.dart';
 import '../../../../common/values/cache_keys.dart';
 import '../../controller.dart';
 import 'controller.dart';

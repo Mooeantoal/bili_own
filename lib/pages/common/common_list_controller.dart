@@ -1,4 +1,4 @@
-import 'package:bili_you/common/widget/loading_state.dart';
+import 'package:bili_own/common/widget/loading_state.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 

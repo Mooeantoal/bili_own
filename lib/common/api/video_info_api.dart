@@ -1,10 +1,10 @@
-import 'package:bili_you/common/api/api_constants.dart';
-import 'package:bili_you/common/api/video_operation_api.dart';
-import 'package:bili_you/common/models/local/video/part_info.dart';
-import 'package:bili_you/common/models/local/video/video_info.dart';
-import 'package:bili_you/common/models/network/video_info/video_info.dart';
-import 'package:bili_you/common/models/network/video_info/video_parts.dart';
-import 'package:bili_you/common/utils/http_utils.dart';
+import 'package:bili_own/common/api/api_constants.dart';
+import 'package:bili_own/common/api/video_operation_api.dart';
+import 'package:bili_own/common/models/local/video/part_info.dart';
+import 'package:bili_own/common/models/local/video/video_info.dart';
+import 'package:bili_own/common/models/network/video_info/video_info.dart';
+import 'package:bili_own/common/models/network/video_info/video_parts.dart';
+import 'package:bili_own/common/utils/http_utils.dart';
 
 class VideoInfoApi {
   static Future<VideoInfoResponse> _requestVideoInfo(

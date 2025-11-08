@@ -1,6 +1,6 @@
 import 'dart:convert';
 
-import 'package:bili_you/common/utils/http_utils.dart';
+import 'package:bili_own/common/utils/http_utils.dart';
 import 'package:dio/dio.dart';
 
 import '../models/network/github/github_releases_item.dart';

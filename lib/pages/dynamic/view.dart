@@ -1,5 +1,5 @@
-import 'package:bili_you/common/widget/simple_easy_refresher.dart';
-import 'package:bili_you/pages/dynamic/widget/dynamic_item_card.dart';
+import 'package:bili_own/common/widget/simple_easy_refresher.dart';
+import 'package:bili_own/pages/dynamic/widget/dynamic_item_card.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 

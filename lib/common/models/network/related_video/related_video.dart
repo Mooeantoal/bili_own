@@ -1,6 +1,6 @@
 import 'dart:convert';
 
-import 'package:bili_you/common/models/network/home/recommend_video.dart';
+import 'package:bili_own/common/models/network/home/recommend_video.dart';
 
 class RelatedVideoResponse {
   RelatedVideoResponse({

@@ -4,7 +4,7 @@
 
 import 'dart:convert';
 
-import 'package:bili_you/common/models/network/reply/reply.dart';
+import 'package:bili_own/common/models/network/reply/reply.dart';
 
 class DynamicResponse {
   DynamicResponse({

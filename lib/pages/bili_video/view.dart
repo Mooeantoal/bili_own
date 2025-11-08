@@ -1,8 +1,8 @@
-import 'package:bili_you/common/models/local/reply/reply_item.dart';
-import 'package:bili_you/common/values/hero_tag_id.dart';
-import 'package:bili_you/pages/bili_video/widgets/bili_video_player/bili_video_player.dart';
-import 'package:bili_you/pages/bili_video/widgets/introduction/index.dart';
-import 'package:bili_you/pages/bili_video/widgets/reply/view.dart';
+import 'package:bili_own/common/models/local/reply/reply_item.dart';
+import 'package:bili_own/common/values/hero_tag_id.dart';
+import 'package:bili_own/pages/bili_video/widgets/bili_video_player/bili_video_player.dart';
+import 'package:bili_own/pages/bili_video/widgets/introduction/index.dart';
+import 'package:bili_own/pages/bili_video/widgets/reply/view.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';

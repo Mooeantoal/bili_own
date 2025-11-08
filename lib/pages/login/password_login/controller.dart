@@ -1,13 +1,13 @@
 import 'dart:developer';
 
-import 'package:bili_you/common/api/login_api.dart';
-import 'package:bili_you/common/models/network/login/captcha_result.dart';
-import 'package:bili_you/common/models/network/login/password_login_result.dart';
-import 'package:bili_you/pages/login/sms_login/index.dart';
+import 'package:bili_own/common/api/login_api.dart';
+import 'package:bili_own/common/models/network/login/captcha_result.dart';
+import 'package:bili_own/common/models/network/login/password_login_result.dart';
+import 'package:bili_own/pages/login/sms_login/index.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
-import 'package:bili_you/common/models/network/login/password_login_key_hash.dart';
+import 'package:bili_own/common/models/network/login/password_login_key_hash.dart';
 import '../controller.dart';
 
 class PasswordLoginController extends GetxController {

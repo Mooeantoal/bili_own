@@ -1,12 +1,12 @@
-import 'package:bili_you/common/utils/bvid_avid_util.dart';
-import 'package:bili_you/common/utils/string_format_utils.dart';
-import 'package:bili_you/common/values/hero_tag_id.dart';
-import 'package:bili_you/common/widget/avatar.dart';
-import 'package:bili_you/common/widget/foldable_text.dart';
-import 'package:bili_you/common/widget/icon_text_button.dart';
-import 'package:bili_you/common/widget/video_tile_item.dart';
-import 'package:bili_you/pages/bili_video/view.dart';
-import 'package:bili_you/pages/user_space/view.dart';
+import 'package:bili_own/common/utils/bvid_avid_util.dart';
+import 'package:bili_own/common/utils/string_format_utils.dart';
+import 'package:bili_own/common/values/hero_tag_id.dart';
+import 'package:bili_own/common/widget/avatar.dart';
+import 'package:bili_own/common/widget/foldable_text.dart';
+import 'package:bili_own/common/widget/icon_text_button.dart';
+import 'package:bili_own/common/widget/video_tile_item.dart';
+import 'package:bili_own/pages/bili_video/view.dart';
+import 'package:bili_own/pages/user_space/view.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 

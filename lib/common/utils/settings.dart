@@ -1,10 +1,10 @@
 import 'dart:io';
 
-import 'package:bili_you/common/api/github_api.dart';
-import 'package:bili_you/common/models/local/video/audio_play_item.dart';
-import 'package:bili_you/common/models/local/video/video_play_item.dart';
-import 'package:bili_you/common/models/network/github/github_releases_item.dart';
-import 'package:bili_you/common/utils/bili_you_storage.dart';
+import 'package:bili_own/common/api/github_api.dart';
+import 'package:bili_own/common/models/local/video/audio_play_item.dart';
+import 'package:bili_own/common/models/local/video/video_play_item.dart';
+import 'package:bili_own/common/models/network/github/github_releases_item.dart';
+import 'package:bili_own/common/utils/bili_own_storage.dart';
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:flutter/material.dart';
 
@@ -98,12 +98,12 @@ class SettingsUtil {
                           content:
                               Text("没有匹配到支持的abi!\n现跳转至下载页面,请自行选择合适的安装包.")));
                       launchUrlString(
-                          "https://github.com/lucinhu/bili_you/releases",
+                          "https://github.com/lucinhu/bili_own/releases",
                           mode: LaunchMode.externalApplication);
                     } else if (Platform.isLinux) {
                       //linux
                       launchUrlString(
-                          "https://github.com/lucinhu/bili_you/releases",
+                          "https://github.com/lucinhu/bili_own/releases",
                           mode: LaunchMode.externalApplication);
                     } else if (Platform.isIOS) {
                       //TODO ios

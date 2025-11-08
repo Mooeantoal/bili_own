@@ -1,13 +1,13 @@
 import 'dart:developer';
 
-import 'package:bili_you/common/models/local/video_tile/video_tile_info.dart';
-import 'package:bili_you/common/utils/index.dart';
-import 'package:bili_you/common/values/cache_keys.dart';
+import 'package:bili_own/common/models/local/video_tile/video_tile_info.dart';
+import 'package:bili_own/common/utils/index.dart';
+import 'package:bili_own/common/values/cache_keys.dart';
 import 'package:easy_refresh/easy_refresh.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import 'package:get/get.dart';
-import 'package:bili_you/common/api/home_api.dart';
+import 'package:bili_own/common/api/home_api.dart';
 
 class PopularVideoController {
   PopularVideoController();

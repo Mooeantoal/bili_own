@@ -1,7 +1,7 @@
-import 'package:bili_you/pages/bili_video/widgets/bili_video_player/bili_danmaku.dart';
-import 'package:bili_you/pages/bili_video/widgets/bili_video_player/bili_video_player.dart';
-import 'package:bili_you/pages/bili_video/widgets/bili_video_player/bili_video_player_panel.dart';
-import 'package:bili_you/pages/bili_video/widgets/reply/index.dart';
+import 'package:bili_own/pages/bili_video/widgets/bili_video_player/bili_danmaku.dart';
+import 'package:bili_own/pages/bili_video/widgets/bili_video_player/bili_video_player.dart';
+import 'package:bili_own/pages/bili_video/widgets/bili_video_player/bili_video_player_panel.dart';
+import 'package:bili_own/pages/bili_video/widgets/reply/index.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 

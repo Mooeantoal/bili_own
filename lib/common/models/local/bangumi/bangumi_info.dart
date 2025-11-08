@@ -1,4 +1,4 @@
-import 'package:bili_you/common/models/local/bangumi/episode_info.dart';
+import 'package:bili_own/common/models/local/bangumi/episode_info.dart';
 
 class BangumiInfo {
   BangumiInfo(

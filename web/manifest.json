@@ -1,6 +1,6 @@
 {
-    "name": "bili_you",
-    "short_name": "bili_you",
+    "name": "bili_own",
+    "short_name": "bili_own",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#hexcode",

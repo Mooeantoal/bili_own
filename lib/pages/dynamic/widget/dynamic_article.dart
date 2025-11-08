@@ -1,6 +1,6 @@
-import 'package:bili_you/common/models/local/dynamic/dynamic_content.dart';
-import 'package:bili_you/common/widget/foldable_text.dart';
-import 'package:bili_you/pages/dynamic/widget/dynamic_draw.dart';
+import 'package:bili_own/common/models/local/dynamic/dynamic_content.dart';
+import 'package:bili_own/common/widget/foldable_text.dart';
+import 'package:bili_own/pages/dynamic/widget/dynamic_draw.dart';
 import 'package:flutter/material.dart';
 
 class DynamicArticleWidget extends StatelessWidget {

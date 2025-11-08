@@ -1,9 +1,9 @@
-import 'package:bili_you/common/api/index.dart';
-import 'package:bili_you/common/models/local/video/click_add_coin_result.dart';
-import 'package:bili_you/common/models/local/video/click_add_share_result.dart';
-import 'package:bili_you/common/models/local/video/click_like_result.dart';
-import 'package:bili_you/common/utils/cookie_util.dart';
-import 'package:bili_you/common/utils/http_utils.dart';
+import 'package:bili_own/common/api/index.dart';
+import 'package:bili_own/common/models/local/video/click_add_coin_result.dart';
+import 'package:bili_own/common/models/local/video/click_add_share_result.dart';
+import 'package:bili_own/common/models/local/video/click_like_result.dart';
+import 'package:bili_own/common/utils/cookie_util.dart';
+import 'package:bili_own/common/utils/http_utils.dart';
 
 ///视频操作
 class VideoOperationApi {

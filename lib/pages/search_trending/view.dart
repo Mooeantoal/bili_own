@@ -1,13 +1,13 @@
 import 'dart:math';
 
-import 'package:bili_you/common/widget/loading_widget/http_error.dart';
-import 'package:bili_you/common/widget/loading_widget/loading_widget.dart';
-import 'package:bili_you/common/widget/refresh_indicator.dart';
-import 'package:bili_you/common/api/search_api.dart';
-import 'package:bili_you/common/models/network/search/search_trending/data.dart';
-import 'package:bili_you/common/models/network/search/search_trending/list.dart';
-import 'package:bili_you/pages/search_trending/controller.dart';
-import 'package:bili_you/common/utils/image_utils.dart';
+import 'package:bili_own/common/widget/loading_widget/http_error.dart';
+import 'package:bili_own/common/widget/loading_widget/loading_widget.dart';
+import 'package:bili_own/common/widget/refresh_indicator.dart';
+import 'package:bili_own/common/api/search_api.dart';
+import 'package:bili_own/common/models/network/search/search_trending/data.dart';
+import 'package:bili_own/common/models/network/search/search_trending/list.dart';
+import 'package:bili_own/pages/search_trending/controller.dart';
+import 'package:bili_own/common/utils/image_utils.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';

@@ -1,18 +1,18 @@
 import 'dart:developer';
 
-import 'package:bili_you/common/api/video_operation_api.dart';
-import 'package:bili_you/common/models/local/reply/reply_item.dart';
-import 'package:bili_you/common/utils/bvid_avid_util.dart';
-import 'package:bili_you/common/utils/http_utils.dart';
-import 'package:bili_you/pages/about/about_page.dart';
-import 'package:bili_you/pages/bili_video/widgets/reply/index.dart';
-import 'package:bili_you/pages/bili_video/widgets/bili_video_player/bili_video_player.dart';
-import 'package:bili_you/pages/login/password_login/index.dart';
-import 'package:bili_you/pages/login/sms_login/index.dart';
-import 'package:bili_you/pages/ui_test/test_widget/media_kit_test_page.dart';
-import 'package:bili_you/pages/user_space/view.dart';
-import 'package:bili_you/pages/test/piliplus_comments_page.dart';
-import 'package:bili_you/pages/test/video_player_test_page.dart';
+import 'package:bili_own/common/api/video_operation_api.dart';
+import 'package:bili_own/common/models/local/reply/reply_item.dart';
+import 'package:bili_own/common/utils/bvid_avid_util.dart';
+import 'package:bili_own/common/utils/http_utils.dart';
+import 'package:bili_own/pages/about/about_page.dart';
+import 'package:bili_own/pages/bili_video/widgets/reply/index.dart';
+import 'package:bili_own/pages/bili_video/widgets/bili_video_player/bili_video_player.dart';
+import 'package:bili_own/pages/login/password_login/index.dart';
+import 'package:bili_own/pages/login/sms_login/index.dart';
+import 'package:bili_own/pages/ui_test/test_widget/media_kit_test_page.dart';
+import 'package:bili_own/pages/user_space/view.dart';
+import 'package:bili_own/pages/test/piliplus_comments_page.dart';
+import 'package:bili_own/pages/test/video_player_test_page.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 

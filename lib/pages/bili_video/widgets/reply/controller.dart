@@ -1,8 +1,8 @@
 import 'dart:developer';
-import 'package:bili_you/common/api/reply_api.dart';
-import 'package:bili_you/common/models/local/reply/reply_info.dart';
-import 'package:bili_you/common/models/local/reply/reply_item.dart';
-import 'package:bili_you/common/values/cache_keys.dart';
+import 'package:bili_own/common/api/reply_api.dart';
+import 'package:bili_own/common/models/local/reply/reply_info.dart';
+import 'package:bili_own/common/models/local/reply/reply_item.dart';
+import 'package:bili_own/common/values/cache_keys.dart';
 import 'package:easy_refresh/easy_refresh.dart';
 
 import 'package:flutter/material.dart';

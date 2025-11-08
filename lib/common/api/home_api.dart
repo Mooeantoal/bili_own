@@ -1,8 +1,8 @@
-import 'package:bili_you/common/models/local/home/recommend_item_info.dart';
-import 'package:bili_you/common/models/local/video_tile/video_tile_info.dart';
-import 'package:bili_you/common/models/network/home/recommend_video.dart';
-import 'package:bili_you/common/utils/http_utils.dart';
-import 'package:bili_you/common/api/api_constants.dart';
+import 'package:bili_own/common/models/local/home/recommend_item_info.dart';
+import 'package:bili_own/common/models/local/video_tile/video_tile_info.dart';
+import 'package:bili_own/common/models/network/home/recommend_video.dart';
+import 'package:bili_own/common/utils/http_utils.dart';
+import 'package:bili_own/common/api/api_constants.dart';
 
 class HomeApi {
   static Future<RecommendVideoResponse> _requestRecommendVideos(

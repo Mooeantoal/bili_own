@@ -1,5 +1,5 @@
-import 'package:bili_you/common/models/local/reply/official_verify.dart';
-import 'package:bili_you/common/models/local/reply/vip.dart';
+import 'package:bili_own/common/models/local/reply/official_verify.dart';
+import 'package:bili_own/common/models/local/reply/vip.dart';
 
 import 'level_info.dart';
 

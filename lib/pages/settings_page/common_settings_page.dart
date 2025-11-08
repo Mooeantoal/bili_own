@@ -1,10 +1,10 @@
-import 'package:bili_you/common/index.dart';
-import 'package:bili_you/common/models/local/video/audio_play_item.dart';
-import 'package:bili_you/common/models/local/video/video_play_item.dart';
-import 'package:bili_you/common/widget/settings_label.dart';
-import 'package:bili_you/common/widget/settings_radios_tile.dart';
-import 'package:bili_you/common/widget/settings_switch_tile.dart';
-import 'package:bili_you/pages/recommend/index.dart';
+import 'package:bili_own/common/index.dart';
+import 'package:bili_own/common/models/local/video/audio_play_item.dart';
+import 'package:bili_own/common/models/local/video/video_play_item.dart';
+import 'package:bili_own/common/widget/settings_label.dart';
+import 'package:bili_own/common/widget/settings_radios_tile.dart';
+import 'package:bili_own/common/widget/settings_switch_tile.dart';
+import 'package:bili_own/pages/recommend/index.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 

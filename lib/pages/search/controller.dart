@@ -1,12 +1,12 @@
 import 'dart:async';
-import 'package:bili_you/common/api/search_api.dart';
-import 'package:bili_you/common/models/local/search/search_suggest_item.dart';
-import 'package:bili_you/common/utils/bili_you_storage.dart';
-import 'package:bili_you/pages/search_result/view.dart';
+import 'package:bili_own/common/api/search_api.dart';
+import 'package:bili_own/common/models/local/search/search_suggest_item.dart';
+import 'package:bili_own/common/utils/bili_own_storage.dart';
+import 'package:bili_own/pages/search_result/view.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:rxdart/rxdart.dart';
-import 'package:bili_you/common/models/network/search/search_trending/list.dart';
+import 'package:bili_own/common/models/network/search/search_trending/list.dart';
 
 class SSearchController extends GetxController {
   SSearchController(this.tag);

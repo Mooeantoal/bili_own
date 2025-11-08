@@ -1,5 +1,5 @@
-import 'package:bili_you/common/models/local/video/audio_play_item.dart';
-import 'package:bili_you/common/models/local/video/video_play_item.dart';
+import 'package:bili_own/common/models/local/video/audio_play_item.dart';
+import 'package:bili_own/common/models/local/video/video_play_item.dart';
 
 class VideoPlayInfo {
   VideoPlayInfo(

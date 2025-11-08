@@ -14,7 +14,7 @@
 
 ## 项目信息
 
-此项目fork自[lucinhu/bili_you](https://github.com/lucinhu/bili_you)，并在其基础上进行改进和定制。
+此项目fork自[lucinhu/bili_own](https://github.com/lucinhu/bili_own)，并在其基础上进行改进和定制。
 
 ## 功能实现
 
@@ -62,7 +62,7 @@
 
 特别感谢以下项目的作者和维护者：
 
-- [lucinhu/bili_you](https://github.com/lucinhu/bili_you) - 原项目作者 @lucinhu
+- [lucinhu/bili_own](https://github.com/lucinhu/bili_own) - 原项目作者 @lucinhu
 - [PiliPlus](https://github.com/bggRGjQaUbCoE/PiliPlus) - @bggRGjQaUbCoE
 - [PiliPalaX](https://github.com/orz12/PiliPalaX) - @orz12
 - [pilipala](https://github.com/guozhigq/pilipala) - @guozhigq

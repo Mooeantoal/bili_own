@@ -1,4 +1,4 @@
-import 'package:bili_you/common/utils/bili_you_storage.dart';
+import 'package:bili_own/common/utils/bili_own_storage.dart';
 import 'package:flutter/material.dart';
 
 class SettingsSwitchTile extends StatelessWidget {

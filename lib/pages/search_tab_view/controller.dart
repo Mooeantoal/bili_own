@@ -1,24 +1,24 @@
 import 'dart:async';
 
-import 'package:bili_you/common/api/bangumi_api.dart';
-import 'package:bili_you/common/models/local/bangumi/bangumi_info.dart';
-import 'package:bili_you/common/models/local/search/search_bangumi_item.dart';
-import 'package:bili_you/common/models/local/search/search_user_item.dart';
-import 'package:bili_you/common/models/local/search/search_video_item.dart';
-import 'package:bili_you/common/models/local/video/part_info.dart';
-import 'package:bili_you/common/utils/bvid_avid_util.dart';
-import 'package:bili_you/common/values/hero_tag_id.dart';
-import 'package:bili_you/common/widget/bangumi_tile_item.dart';
-import 'package:bili_you/common/widget/user_tile_item.dart';
-import 'package:bili_you/pages/bili_video/index.dart';
+import 'package:bili_own/common/api/bangumi_api.dart';
+import 'package:bili_own/common/models/local/bangumi/bangumi_info.dart';
+import 'package:bili_own/common/models/local/search/search_bangumi_item.dart';
+import 'package:bili_own/common/models/local/search/search_user_item.dart';
+import 'package:bili_own/common/models/local/search/search_video_item.dart';
+import 'package:bili_own/common/models/local/video/part_info.dart';
+import 'package:bili_own/common/utils/bvid_avid_util.dart';
+import 'package:bili_own/common/values/hero_tag_id.dart';
+import 'package:bili_own/common/widget/bangumi_tile_item.dart';
+import 'package:bili_own/common/widget/user_tile_item.dart';
+import 'package:bili_own/pages/bili_video/index.dart';
 import 'package:get/get.dart';
 import 'dart:developer';
-import 'package:bili_you/common/api/search_api.dart';
-import 'package:bili_you/common/api/video_info_api.dart';
-import 'package:bili_you/common/utils/string_format_utils.dart';
-import 'package:bili_you/common/values/cache_keys.dart';
-import 'package:bili_you/common/widget/video_tile_item.dart';
-import 'package:bili_you/pages/bili_video/view.dart';
+import 'package:bili_own/common/api/search_api.dart';
+import 'package:bili_own/common/api/video_info_api.dart';
+import 'package:bili_own/common/utils/string_format_utils.dart';
+import 'package:bili_own/common/values/cache_keys.dart';
+import 'package:bili_own/common/widget/video_tile_item.dart';
+import 'package:bili_own/pages/bili_video/view.dart';
 import 'package:easy_refresh/easy_refresh.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_cache_manager/flutter_cache_manager.dart';
@@ -240,16 +240,6 @@ class SearchTabViewController extends GetxController {
           Navigator.of(Get.context!).push(GetPageRoute(
               page: () => BiliVideoPage(bvid: bvid, cid: value.first.cid))));
     }
-  }
-
-  // 更新搜索关键字的方法
-  void updateSearchKeyword(String newKeyword) {
-    keyWord = newKeyword;
-    // 重置分页
-    currentPage = 1;
-    searchItems.clear();
-    // 刷新数据
-    onRefresh();
   }
 
   @override

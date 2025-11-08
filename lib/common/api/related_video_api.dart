@@ -1,7 +1,7 @@
-import 'package:bili_you/common/api/api_constants.dart';
-import 'package:bili_you/common/models/local/related_video/related_video_info.dart';
-import 'package:bili_you/common/models/network/related_video/related_video.dart';
-import 'package:bili_you/common/utils/http_utils.dart';
+import 'package:bili_own/common/api/api_constants.dart';
+import 'package:bili_own/common/models/local/related_video/related_video_info.dart';
+import 'package:bili_own/common/models/network/related_video/related_video.dart';
+import 'package:bili_own/common/utils/http_utils.dart';
 
 class RelatedVideoApi {
   static Future<RelatedVideoResponse> _requestRelatedVideo(

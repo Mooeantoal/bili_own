@@ -1,9 +1,9 @@
-import 'package:bili_you/common/api/api_constants.dart';
-import 'package:bili_you/common/models/local/video/audio_play_item.dart';
-import 'package:bili_you/common/models/local/video/video_play_info.dart';
-import 'package:bili_you/common/models/local/video/video_play_item.dart';
-import 'package:bili_you/common/models/network/video_play/video_play.dart';
-import 'package:bili_you/common/utils/http_utils.dart';
+import 'package:bili_own/common/api/api_constants.dart';
+import 'package:bili_own/common/models/local/video/audio_play_item.dart';
+import 'package:bili_own/common/models/local/video/video_play_info.dart';
+import 'package:bili_own/common/models/local/video/video_play_item.dart';
+import 'package:bili_own/common/models/network/video_play/video_play.dart';
+import 'package:bili_own/common/utils/http_utils.dart';
 import 'package:dio/dio.dart';
 
 class VideoPlayApi {

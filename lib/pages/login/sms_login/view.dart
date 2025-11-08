@@ -1,5 +1,5 @@
-import 'package:bili_you/pages/login/password_login/index.dart';
-import 'package:bili_you/pages/login/web_login/view.dart';
+import 'package:bili_own/pages/login/password_login/index.dart';
+import 'package:bili_own/pages/login/web_login/view.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 

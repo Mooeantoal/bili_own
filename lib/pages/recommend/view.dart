@@ -1,7 +1,7 @@
-import 'package:bili_you/common/utils/string_format_utils.dart';
-import 'package:bili_you/common/values/hero_tag_id.dart';
-import 'package:bili_you/common/widget/simple_easy_refresher.dart';
-import 'package:bili_you/pages/recommend/widgets/recommend_card.dart';
+import 'package:bili_own/common/utils/string_format_utils.dart';
+import 'package:bili_own/common/values/hero_tag_id.dart';
+import 'package:bili_own/common/widget/simple_easy_refresher.dart';
+import 'package:bili_own/pages/recommend/widgets/recommend_card.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'index.dart';

@@ -90,12 +90,12 @@ BEGIN
         BLOCK "040904e4"
         BEGIN
             VALUE "CompanyName", "com.lucinhu" "\0"
-            VALUE "FileDescription", "bili_you" "\0"
+            VALUE "FileDescription", "bili_own" "\0"
             VALUE "FileVersion", VERSION_AS_STRING "\0"
-            VALUE "InternalName", "bili_you" "\0"
+            VALUE "InternalName", "bili_own" "\0"
             VALUE "LegalCopyright", "Copyright (C) 2022 com.lucinhu. All rights reserved." "\0"
-            VALUE "OriginalFilename", "bili_you.exe" "\0"
-            VALUE "ProductName", "bili_you" "\0"
+            VALUE "OriginalFilename", "bili_own.exe" "\0"
+            VALUE "ProductName", "bili_own" "\0"
             VALUE "ProductVersion", VERSION_AS_STRING "\0"
         END
     END

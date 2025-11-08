@@ -1,10 +1,10 @@
 import 'dart:developer';
 
-import 'package:bili_you/common/api/reply_api.dart';
-import 'package:bili_you/common/models/local/reply/reply_item.dart';
-import 'package:bili_you/common/models/local/reply/reply_reply_info.dart';
-import 'package:bili_you/common/widget/simple_easy_refresher.dart';
-import 'package:bili_you/pages/bili_video/widgets/reply/widgets/reply_item.dart';
+import 'package:bili_own/common/api/reply_api.dart';
+import 'package:bili_own/common/models/local/reply/reply_item.dart';
+import 'package:bili_own/common/models/local/reply/reply_reply_info.dart';
+import 'package:bili_own/common/widget/simple_easy_refresher.dart';
+import 'package:bili_own/pages/bili_video/widgets/reply/widgets/reply_item.dart';
 import 'package:easy_refresh/easy_refresh.dart';
 
 import 'package:flutter/material.dart';

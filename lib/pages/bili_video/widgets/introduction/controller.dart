@@ -1,13 +1,13 @@
 import 'dart:developer';
 
-import 'package:bili_you/common/api/index.dart';
-import 'package:bili_you/common/api/video_operation_api.dart';
-import 'package:bili_you/common/models/local/related_video/related_video_info.dart';
-import 'package:bili_you/common/models/local/video/click_add_coin_result.dart';
-import 'package:bili_you/common/models/local/video/click_add_share_result.dart';
-import 'package:bili_you/common/models/local/video/click_like_result.dart';
-import 'package:bili_you/common/models/local/video/video_info.dart';
-import 'package:bili_you/common/values/cache_keys.dart';
+import 'package:bili_own/common/api/index.dart';
+import 'package:bili_own/common/api/video_operation_api.dart';
+import 'package:bili_own/common/models/local/related_video/related_video_info.dart';
+import 'package:bili_own/common/models/local/video/click_add_coin_result.dart';
+import 'package:bili_own/common/models/local/video/click_add_share_result.dart';
+import 'package:bili_own/common/models/local/video/click_like_result.dart';
+import 'package:bili_own/common/models/local/video/video_info.dart';
+import 'package:bili_own/common/values/cache_keys.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import 'package:get/get.dart';

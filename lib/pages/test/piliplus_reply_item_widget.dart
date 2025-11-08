@@ -1,4 +1,4 @@
-import 'package:bili_you/pages/test/piliplus_reply_model.dart';
+import 'package:bili_own/pages/test/piliplus_reply_model.dart';
 import 'package:flutter/material.dart';
 
 /// PiliPlus风格的评论项组件

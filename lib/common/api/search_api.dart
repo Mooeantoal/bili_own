@@ -1,41 +1,61 @@
-import 'package:bili_you/common/api/api_constants.dart';
-import 'package:bili_you/common/models/network/bangumi/bangumi_info/bangumi_info.dart';
-import 'package:bili_you/common/models/network/search/bangumi_search/bangumi_search.dart';
-import 'package:bili_you/common/models/network/search/hot_word/hot_word.dart';
-import 'package:bili_you/common/models/network/search/search_suggest/search_suggest.dart';
-import 'package:bili_you/common/models/network/search/search_trending/search_trending.dart';
-import 'package:bili_you/common/models/network/search/search_video/search_video.dart';
-import 'package:bili_you/common/models/network/search/search_bangumi.dart';
-import 'package:bili_you/common/models/network/user/user_info/user_info.dart';
-import 'package:bili_you/common/models/local/search/search_video_item.dart';
-import 'package:bili_you/common/models/local/search/search_bangumi_item.dart';
-import 'package:bili_you/common/models/local/search/search_user_item.dart';
-import 'package:bili_you/common/models/local/search/hot_word_item.dart';
-import 'package:bili_you/common/models/local/search/search_suggest_item.dart';
-import 'package:bili_you/common/models/local/gender.dart';
-import 'package:bili_you/common/models/local/official_verify.dart';
-import 'package:bili_you/common/utils/http_utils.dart';
-import 'package:bili_you/common/utils/string_format_utils.dart';
+import 'package:bili_own/common/api/api_constants.dart';
+import 'package:bili_own/common/models/local/reply/official_verify.dart';
+import 'package:bili_own/common/models/local/reply/reply_member.dart';
+import 'package:bili_own/common/models/local/search/default_search_word.dart';
+import 'package:bili_own/common/models/local/search/hot_word_item.dart';
+import 'package:bili_own/common/models/local/search/search_bangumi_item.dart';
+import 'package:bili_own/common/models/local/search/search_suggest_item.dart';
+import 'package:bili_own/common/models/local/search/search_user_item.dart';
+import 'package:bili_own/common/models/network/search/default_search_word.dart';
+import 'package:bili_own/common/models/network/search/hot_words.dart';
+import 'package:bili_own/common/models/network/search/search_bangumi.dart';
+import 'package:bili_own/common/models/network/search/search_suggest.dart';
+import 'package:bili_own/common/models/network/search/search_video.dart';
+import 'package:bili_own/common/models/network/search/search_trending/data.dart';
+import 'package:bili_own/common/models/local/search/search_video_item.dart';
+import 'package:bili_own/common/utils/http_utils.dart';
+import 'package:bili_own/common/utils/string_format_utils.dart';
 
-///搜索api
 class SearchApi {
-  ///获取热搜词
+  static Future<DefaultSearchWordResponse> _requestDefaultSearchWords() async {
+    var response = await HttpUtils().get(ApiConstants.defualtSearchWord);
+    return DefaultSearchWordResponse.fromJson(response.data);
+  }
+
+  ///获取默认搜索词
+  static Future<DefaultSearchWord> getDefaultSearchWords() async {
+    var response = await _requestDefaultSearchWords();
+    if (response.code != 0) {
+      throw "getRequestDefaultSearchWords: code:${response.code}, message:${response.message}";
+    }
+    if (response.data == null) {
+      return DefaultSearchWord.zero;
+    }
+    return DefaultSearchWord(
+        showName: response.data!.showName ?? "",
+        name: response.data!.name ?? "");
+  }
+
+  static Future<HotWordResponse> _requestHotWords() async {
+    var response = await HttpUtils().get(ApiConstants.hotWordsMob);
+    return HotWordResponse.fromJson(response.data);
+  }
+
+  ///获取热词列表
   static Future<List<HotWordItem>> getHotWords() async {
     List<HotWordItem> list = [];
     var response = await _requestHotWords();
     if (response.code != 0) {
-      throw "getHotWords: code:${response.code}";
+      throw "getHotWords: code:${response.code}, message:${response.message}";
     }
-    for (var i in response.data.list) {
+    if (response.data == null || response.data!.list == null) {
+      return list;
+    }
+    for (var i in response.data!.list!) {
       list.add(
           HotWordItem(keyWord: i.keyword ?? "", showWord: i.showName ?? ""));
     }
     return list;
-  }
-
-  static Future<HotWordResponse> _requestHotWords() async {
-    var response = await HttpUtils().get(ApiConstants.searchHotWord);
-    return HotWordResponse.fromJson(response.data);
   }
 
   static Future<SearchSuggestResponse> _requestSearchSuggests(
@@ -58,10 +78,7 @@ class SearchApi {
     }
     for (var i in response.result!.tag!) {
       list.add(
-          SearchSuggestItem(
-              showWord: StringFormatUtils.replaceAllHtmlEntitiesToCharacter(
-                  StringFormatUtils.keyWordTitleToRawTitle(i.name ?? "")),
-              realWord: i.value ?? ""));
+          SearchSuggestItem(showWord: i.name ?? "", realWord: i.value ?? ""));
     }
     return list;
   }
@@ -192,11 +209,9 @@ class SearchApi {
     for (Map<String, dynamic> i in response.data['data']?['result'] ?? []) {
       list.add(SearchUserItem(
           mid: i['mid'],
-          name: StringFormatUtils.replaceAllHtmlEntitiesToCharacter(
-              StringFormatUtils.keyWordTitleToRawTitle(i['uname'] ?? "")),
+          name: i['uname'],
           face: "http:${i['upic']}",
-          sign: StringFormatUtils.replaceAllHtmlEntitiesToCharacter(
-              StringFormatUtils.keyWordTitleToRawTitle(i['usign'] ?? "")),
+          sign: i['usign'],
           fansCount: i['fans'],
           videoCount: i['videos'],
           level: i['level'],
@@ -207,9 +222,7 @@ class SearchApi {
           officialVerify: OfficialVerify(
               type:
                   OfficialVerifyTypeCode.fromCode(i['official_verify']['type']),
-              description: StringFormatUtils.replaceAllHtmlEntitiesToCharacter(
-                  StringFormatUtils.keyWordTitleToRawTitle(
-                      i['official_verify']['desc'] ?? "")))));
+              description: i['official_verify']['desc'])));
     }
     return list;
   }

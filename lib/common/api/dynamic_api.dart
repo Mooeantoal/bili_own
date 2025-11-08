@@ -1,13 +1,13 @@
-import 'package:bili_you/common/api/api_constants.dart';
-import 'package:bili_you/common/models/local/dynamic/dynamic_author.dart';
-import 'package:bili_you/common/models/local/dynamic/dynamic_content.dart';
-import 'package:bili_you/common/models/local/dynamic/dynamic_item.dart';
-import 'package:bili_you/common/models/local/dynamic/dynamic_stat.dart';
-import 'package:bili_you/common/models/local/reply/official_verify.dart';
-import 'package:bili_you/common/models/local/reply/reply_content.dart';
-import 'package:bili_you/common/models/local/reply/reply_item.dart';
-import 'package:bili_you/common/models/network/dynamic/dynamic.dart' as raw;
-import 'package:bili_you/common/utils/http_utils.dart';
+import 'package:bili_own/common/api/api_constants.dart';
+import 'package:bili_own/common/models/local/dynamic/dynamic_author.dart';
+import 'package:bili_own/common/models/local/dynamic/dynamic_content.dart';
+import 'package:bili_own/common/models/local/dynamic/dynamic_item.dart';
+import 'package:bili_own/common/models/local/dynamic/dynamic_stat.dart';
+import 'package:bili_own/common/models/local/reply/official_verify.dart';
+import 'package:bili_own/common/models/local/reply/reply_content.dart';
+import 'package:bili_own/common/models/local/reply/reply_item.dart';
+import 'package:bili_own/common/models/network/dynamic/dynamic.dart' as raw;
+import 'package:bili_own/common/utils/http_utils.dart';
 import '../models/local/reply/vip.dart';
 
 class DynamicApi {

@@ -41,7 +41,7 @@ def _keyAlias = System.getenv("KEY_ALIAS") ?: keystoreProperties.getProperty("ke
 def _keyPassword = System.getenv("KEY_PASSWORD") ?: keystoreProperties.getProperty("keyPassword")
 
 android {
-    namespace 'com.lucinhu.bili_you'
+    namespace 'com.lucinhu.bili_own'
     compileSdk 36
     ndkVersion "27.0.12077973"
 

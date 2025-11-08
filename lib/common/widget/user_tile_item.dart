@@ -1,7 +1,7 @@
-import 'package:bili_you/common/models/local/search/search_user_item.dart';
-import 'package:bili_you/common/utils/index.dart';
-import 'package:bili_you/common/widget/avatar.dart';
-import 'package:bili_you/pages/user_space/view.dart';
+import 'package:bili_own/common/models/local/search/search_user_item.dart';
+import 'package:bili_own/common/utils/index.dart';
+import 'package:bili_own/common/widget/avatar.dart';
+import 'package:bili_own/pages/user_space/view.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 

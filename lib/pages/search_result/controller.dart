@@ -1,4 +1,4 @@
-import 'package:bili_you/common/api/search_api.dart';
+import 'package:bili_own/common/api/search_api.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -22,11 +22,5 @@ class SearchResultController extends GetxController
     tabController = TabController(
         length: 5, vsync: this, initialIndex: currentSelectedTabIndex);
     super.onInit();
-  }
-  
-  // 更新搜索关键字的方法
-  void updateSearchKeyword(String newKeyword) {
-    keyWord = newKeyword;
-    update(); // 通知页面更新
   }
 }

@@ -1,6 +1,6 @@
 class ApiConstants {
   static const String githubLatestRelease =
-      'https://api.github.com/repos/lucinhu/bili_you/releases/latest';
+      'https://api.github.com/repos/lucinhu/bili_own/releases/latest';
 
   static const String userAgent =
       'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/112.0.0.0 Safari/537.36 Edg/112.0.0.0';

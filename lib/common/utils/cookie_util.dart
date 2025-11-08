@@ -1,4 +1,4 @@
-import 'package:bili_you/common/api/api_constants.dart';
+import 'package:bili_own/common/api/api_constants.dart';
 
 import 'http_utils.dart';
 

@@ -1,5 +1,5 @@
-import 'package:bili_you/common/models/local/dynamic/dynamic_item.dart';
-import 'package:bili_you/common/models/local/reply/reply_content.dart';
+import 'package:bili_own/common/models/local/dynamic/dynamic_item.dart';
+import 'package:bili_own/common/models/local/reply/reply_content.dart';
 
 abstract class DynamicContent {
   DynamicContent({required this.description, required this.emotes});

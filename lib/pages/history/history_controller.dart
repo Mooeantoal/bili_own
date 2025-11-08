@@ -1,8 +1,8 @@
 import 'dart:developer';
 
-import 'package:bili_you/common/api/history_api.dart';
-import 'package:bili_you/common/models/local/history/video_view_history_item.dart';
-import 'package:bili_you/common/values/index.dart';
+import 'package:bili_own/common/api/history_api.dart';
+import 'package:bili_own/common/models/local/history/video_view_history_item.dart';
+import 'package:bili_own/common/values/index.dart';
 import 'package:easy_refresh/easy_refresh.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_cache_manager/flutter_cache_manager.dart';

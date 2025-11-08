@@ -1,11 +1,11 @@
 import 'dart:developer';
 
-import 'package:bili_you/common/api/danmaku_api.dart';
-import 'package:bili_you/common/models/network/proto/danmaku/danmaku.pb.dart';
-import 'package:bili_you/common/utils/index.dart';
-import 'package:bili_you/common/widget/video_audio_player.dart';
+import 'package:bili_own/common/api/danmaku_api.dart';
+import 'package:bili_own/common/models/network/proto/danmaku/danmaku.pb.dart';
+import 'package:bili_own/common/utils/index.dart';
+import 'package:bili_own/common/widget/video_audio_player.dart';
 
-import 'package:bili_you/pages/bili_video/widgets/bili_video_player/bili_video_player.dart';
+import 'package:bili_own/pages/bili_video/widgets/bili_video_player/bili_video_player.dart';
 import 'package:flutter/material.dart';
 import 'package:ns_danmaku/danmaku_controller.dart';
 import 'package:ns_danmaku/danmaku_view.dart';

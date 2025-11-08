@@ -1,4 +1,4 @@
-import 'package:bili_you/common/utils/index.dart';
+import 'package:bili_own/common/utils/index.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -141,7 +141,7 @@ class _SearchInputPageState extends State<SearchInputPage> {
     return AppBar(
         shape: UnderlineInputBorder(
             borderSide: BorderSide(color: Theme.of(context).dividerColor)),
-        automaticallyImplyLeading: false, // 取消返回键
+        // titleSpacing: 0,
         title: Row(
           children: [
             Expanded(

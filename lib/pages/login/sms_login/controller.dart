@@ -1,11 +1,11 @@
 import 'dart:developer';
 
-import 'package:bili_you/common/models/network/login/captcha_result.dart';
-import 'package:bili_you/common/models/network/login/post_sms_require.dart';
+import 'package:bili_own/common/models/network/login/captcha_result.dart';
+import 'package:bili_own/common/models/network/login/post_sms_require.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:bili_you/common/values/coutry_id.dart';
-import 'package:bili_you/common/api/login_api.dart';
+import 'package:bili_own/common/values/coutry_id.dart';
+import 'package:bili_own/common/api/login_api.dart';
 import '../../../common/models/network/login/post_sms_login.dart';
 import '../controller.dart';
 

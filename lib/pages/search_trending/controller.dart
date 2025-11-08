@@ -1,8 +1,8 @@
-import 'package:bili_you/common/widget/loading_state.dart';
-import 'package:bili_you/common/api/search_api.dart';
-import 'package:bili_you/common/models/network/search/search_trending/data.dart';
-import 'package:bili_you/common/models/network/search/search_trending/list.dart';
-import 'package:bili_you/pages/common/common_list_controller.dart';
+import 'package:bili_own/common/widget/loading_state.dart';
+import 'package:bili_own/common/api/search_api.dart';
+import 'package:bili_own/common/models/network/search/search_trending/data.dart';
+import 'package:bili_own/common/models/network/search/search_trending/list.dart';
+import 'package:bili_own/pages/common/common_list_controller.dart';
 
 class SearchTrendingController
     extends CommonListController<SearchTrendingData, SearchTrendingItemModel> {

@@ -1,7 +1,7 @@
-import 'package:bili_you/common/api/api_constants.dart';
-import 'package:bili_you/common/models/local/user_space/user_video_search.dart';
-import 'package:bili_you/common/models/network/user_space/user_video_search.dart';
-import 'package:bili_you/common/utils/http_utils.dart';
+import 'package:bili_own/common/api/api_constants.dart';
+import 'package:bili_own/common/models/local/user_space/user_video_search.dart';
+import 'package:bili_own/common/models/network/user_space/user_video_search.dart';
+import 'package:bili_own/common/utils/http_utils.dart';
 import 'package:dio/dio.dart';
 
 class UserSpaceApi {

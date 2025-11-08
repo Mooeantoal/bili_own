@@ -1,9 +1,9 @@
-import 'package:bili_you/common/utils/bili_you_storage.dart';
-import 'package:bili_you/common/utils/settings.dart';
-import 'package:bili_you/common/widget/bili_url_scheme.dart';
-import 'package:bili_you/pages/dynamic/view.dart';
-import 'package:bili_you/pages/home/index.dart';
-import 'package:bili_you/pages/recommend/controller.dart';
+import 'package:bili_own/common/utils/bili_own_storage.dart';
+import 'package:bili_own/common/utils/settings.dart';
+import 'package:bili_own/common/widget/bili_url_scheme.dart';
+import 'package:bili_own/pages/dynamic/view.dart';
+import 'package:bili_own/pages/home/index.dart';
+import 'package:bili_own/pages/recommend/controller.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 

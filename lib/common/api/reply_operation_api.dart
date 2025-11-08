@@ -1,8 +1,8 @@
-import 'package:bili_you/common/api/index.dart';
-import 'package:bili_you/common/models/local/reply/reply_add_like_result.dart';
-import 'package:bili_you/common/models/local/reply/reply_item.dart';
-import 'package:bili_you/common/utils/cookie_util.dart';
-import 'package:bili_you/common/utils/http_utils.dart';
+import 'package:bili_own/common/api/index.dart';
+import 'package:bili_own/common/models/local/reply/reply_add_like_result.dart';
+import 'package:bili_own/common/models/local/reply/reply_item.dart';
+import 'package:bili_own/common/utils/cookie_util.dart';
+import 'package:bili_own/common/utils/http_utils.dart';
 
 class ReplyOperationApi {
   static Future<ReplyAddLikeResult> addLike(

@@ -1,4 +1,4 @@
-import 'package:bili_you/common/models/local/reply/reply_member.dart';
+import 'package:bili_own/common/models/local/reply/reply_member.dart';
 
 class ReplyContent {
   ReplyContent(

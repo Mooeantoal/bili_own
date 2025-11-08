@@ -1,5 +1,5 @@
-import 'package:bili_you/common/utils/index.dart';
-import 'package:bili_you/common/widget/settings_label.dart';
+import 'package:bili_own/common/utils/index.dart';
+import 'package:bili_own/common/widget/settings_label.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 

@@ -1,4 +1,4 @@
-import 'package:bili_you/common/widget/radio_list_dialog.dart';
+import 'package:bili_own/common/widget/radio_list_dialog.dart';
 import 'package:flutter/material.dart';
 
 class SettingsRadiosTile<T> extends StatefulWidget {

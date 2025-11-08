@@ -1,4 +1,4 @@
-import 'package:bili_you/common/models/local/reply/reply_item.dart';
+import 'package:bili_own/common/models/local/reply/reply_item.dart';
 
 class ReplyInfo {
   ReplyInfo(

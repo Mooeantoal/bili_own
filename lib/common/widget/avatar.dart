@@ -1,8 +1,8 @@
 import 'dart:math';
 
-import 'package:bili_you/common/models/local/reply/official_verify.dart';
-import 'package:bili_you/common/widget/cached_network_image.dart';
-import 'package:bili_you/index.dart';
+import 'package:bili_own/common/models/local/reply/official_verify.dart';
+import 'package:bili_own/common/widget/cached_network_image.dart';
+import 'package:bili_own/index.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 

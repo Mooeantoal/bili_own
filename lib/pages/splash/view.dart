@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:bili_you/pages/main/view.dart';
+import 'package:bili_own/pages/main/view.dart';
 
 import 'index.dart';
 

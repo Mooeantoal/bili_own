@@ -1,6 +1,6 @@
 import 'dart:io';
 
-import 'package:bili_you/common/utils/string_format_utils.dart';
+import 'package:bili_own/common/utils/string_format_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:path_provider/path_provider.dart';
 

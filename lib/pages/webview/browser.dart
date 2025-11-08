@@ -1,4 +1,4 @@
-import 'package:bili_you/pages/search_result/view.dart';
+import 'package:bili_own/pages/search_result/view.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:webview_flutter/webview_flutter.dart';

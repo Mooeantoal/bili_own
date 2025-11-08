@@ -1,8 +1,8 @@
-import 'package:bili_you/common/api/api_constants.dart';
-import 'package:bili_you/common/models/local/bangumi/bangumi_info.dart';
-import 'package:bili_you/common/models/local/bangumi/episode_info.dart';
-import 'package:bili_you/common/models/network/bangumi/bangumi_info.dart';
-import 'package:bili_you/common/utils/http_utils.dart';
+import 'package:bili_own/common/api/api_constants.dart';
+import 'package:bili_own/common/models/local/bangumi/bangumi_info.dart';
+import 'package:bili_own/common/models/local/bangumi/episode_info.dart';
+import 'package:bili_own/common/models/network/bangumi/bangumi_info.dart';
+import 'package:bili_own/common/utils/http_utils.dart';
 
 class BangumiApi {
   //ssid(seaseon_id)或者epid都可以

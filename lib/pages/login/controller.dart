@@ -1,9 +1,9 @@
-import 'package:bili_you/common/models/local/login/login_user_info.dart';
-import 'package:bili_you/common/models/local/login/login_user_stat.dart';
-import 'package:bili_you/common/utils/bili_you_storage.dart';
-import 'package:bili_you/common/values/cache_keys.dart';
-import 'package:bili_you/pages/dynamic/controller.dart';
-import 'package:bili_you/pages/home/index.dart';
+import 'package:bili_own/common/models/local/login/login_user_info.dart';
+import 'package:bili_own/common/models/local/login/login_user_stat.dart';
+import 'package:bili_own/common/utils/bili_own_storage.dart';
+import 'package:bili_own/common/values/cache_keys.dart';
+import 'package:bili_own/pages/dynamic/controller.dart';
+import 'package:bili_own/pages/home/index.dart';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_cache_manager/flutter_cache_manager.dart';

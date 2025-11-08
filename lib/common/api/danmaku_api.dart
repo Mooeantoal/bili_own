@@ -1,6 +1,6 @@
-import 'package:bili_you/common/api/api_constants.dart';
-import 'package:bili_you/common/models/network/proto/danmaku/danmaku.pb.dart';
-import 'package:bili_you/common/utils/http_utils.dart';
+import 'package:bili_own/common/api/api_constants.dart';
+import 'package:bili_own/common/models/network/proto/danmaku/danmaku.pb.dart';
+import 'package:bili_own/common/utils/http_utils.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 

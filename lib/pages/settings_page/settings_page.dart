@@ -1,6 +1,6 @@
-import 'package:bili_you/pages/settings_page/appearance_settings_page.dart';
-import 'package:bili_you/pages/settings_page/common_settings_page.dart';
-import 'package:bili_you/pages/settings_page/others_settings_page.dart';
+import 'package:bili_own/pages/settings_page/appearance_settings_page.dart';
+import 'package:bili_own/pages/settings_page/common_settings_page.dart';
+import 'package:bili_own/pages/settings_page/others_settings_page.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 

@@ -1,10 +1,10 @@
-import 'package:bili_you/pages/search/controller.dart';
-import 'package:bili_you/pages/search/widgets/hot_keyword.dart';
-import 'package:bili_you/pages/search/widgets/search_text.dart';
-import 'package:bili_you/common/utils/bili_you_storage.dart';
+import 'package:bili_own/pages/search/controller.dart';
+import 'package:bili_own/pages/search/widgets/hot_keyword.dart';
+import 'package:bili_own/pages/search/widgets/search_text.dart';
+import 'package:bili_own/common/utils/bili_own_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:bili_you/common/models/network/search/search_trending/list.dart';
+import 'package:bili_own/common/models/network/search/search_trending/list.dart';
 
 class SearchPage extends StatefulWidget {
   const SearchPage({super.key});
@@ -47,7 +47,7 @@ class _SearchPageState extends State<SearchPage> {
               decoration: InputDecoration(
                 hintText: '请输入搜索关键词',
                 border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(20), // 圆角设置
+                  borderRadius: BorderRadius.circular(8),
                 ),
                 suffixIcon: IconButton(
                   icon: const Icon(Icons.clear),

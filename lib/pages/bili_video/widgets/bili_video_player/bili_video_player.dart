@@ -1,13 +1,13 @@
 import 'dart:async';
 import 'dart:developer';
 
-import 'package:bili_you/common/api/video_play_api.dart';
-import 'package:bili_you/common/models/local/video/audio_play_item.dart';
-import 'package:bili_you/common/models/local/video/video_play_info.dart';
-import 'package:bili_you/common/models/local/video/video_play_item.dart';
-import 'package:bili_you/common/utils/index.dart';
-import 'package:bili_you/common/widget/video_audio_player.dart';
-import 'package:bili_you/pages/bili_video/widgets/bili_video_player/bili_danmaku.dart';
+import 'package:bili_own/common/api/video_play_api.dart';
+import 'package:bili_own/common/models/local/video/audio_play_item.dart';
+import 'package:bili_own/common/models/local/video/video_play_info.dart';
+import 'package:bili_own/common/models/local/video/video_play_item.dart';
+import 'package:bili_own/common/utils/index.dart';
+import 'package:bili_own/common/widget/video_audio_player.dart';
+import 'package:bili_own/pages/bili_video/widgets/bili_video_player/bili_danmaku.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:photo_view/photo_view.dart';

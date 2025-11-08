@@ -1,12 +1,12 @@
 import 'dart:developer';
 import 'dart:math' as math;
 
-import 'package:bili_you/common/models/local/video/audio_play_item.dart';
-import 'package:bili_you/common/models/local/video/video_play_item.dart';
-import 'package:bili_you/common/utils/index.dart';
-import 'package:bili_you/common/utils/string_format_utils.dart';
-import 'package:bili_you/common/widget/video_audio_player.dart';
-import 'package:bili_you/pages/bili_video/widgets/bili_video_player/bili_video_player.dart';
+import 'package:bili_own/common/models/local/video/audio_play_item.dart';
+import 'package:bili_own/common/models/local/video/video_play_item.dart';
+import 'package:bili_own/common/utils/index.dart';
+import 'package:bili_own/common/utils/string_format_utils.dart';
+import 'package:bili_own/common/widget/video_audio_player.dart';
+import 'package:bili_own/pages/bili_video/widgets/bili_video_player/bili_video_player.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:screen_brightness/screen_brightness.dart';

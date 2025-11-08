@@ -1,4 +1,4 @@
-import 'package:bili_you/common/models/local/video/part_info.dart';
+import 'package:bili_own/common/models/local/video/part_info.dart';
 
 class VideoInfo {
   VideoInfo(

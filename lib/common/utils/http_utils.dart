@@ -1,6 +1,6 @@
 import 'dart:developer';
 
-import 'package:bili_you/common/api/index.dart';
+import 'package:bili_own/common/api/index.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:cookie_jar/cookie_jar.dart';
 import 'package:dio/dio.dart';

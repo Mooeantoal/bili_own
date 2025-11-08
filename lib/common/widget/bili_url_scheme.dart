@@ -1,10 +1,10 @@
 import 'dart:developer';
 
 import 'package:appscheme/appscheme.dart';
-import 'package:bili_you/common/api/index.dart';
-import 'package:bili_you/common/utils/bvid_avid_util.dart';
-import 'package:bili_you/pages/bili_video/index.dart';
-import 'package:bili_you/pages/user_space/view.dart';
+import 'package:bili_own/common/api/index.dart';
+import 'package:bili_own/common/utils/bvid_avid_util.dart';
+import 'package:bili_own/pages/bili_video/index.dart';
+import 'package:bili_own/pages/user_space/view.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 

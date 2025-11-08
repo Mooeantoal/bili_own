@@ -1,8 +1,8 @@
 import 'dart:developer';
 
-import 'package:bili_you/common/api/home_api.dart';
-import 'package:bili_you/common/models/local/video_tile/video_tile_info.dart';
-import 'package:bili_you/common/utils/cache_util.dart';
+import 'package:bili_own/common/api/home_api.dart';
+import 'package:bili_own/common/models/local/video_tile/video_tile_info.dart';
+import 'package:bili_own/common/utils/cache_util.dart';
 import 'package:easy_refresh/easy_refresh.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';

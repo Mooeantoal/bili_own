@@ -1,5 +1,5 @@
-import 'package:bili_you/common/values/cache_keys.dart';
-import 'package:bili_you/common/widget/cached_network_image.dart';
+import 'package:bili_own/common/values/cache_keys.dart';
+import 'package:bili_own/common/widget/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 

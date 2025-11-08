@@ -1,5 +1,5 @@
 import 'dart:convert';
-import 'package:bili_you/common/models/network/search/search_trending/list.dart';
+import 'package:bili_own/common/models/network/search/search_trending/list.dart';
 
 class SearchTrendingData {
   SearchTrendingData({

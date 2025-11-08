@@ -1,4 +1,4 @@
-import 'package:bili_you/common/utils/index.dart';
+import 'package:bili_own/common/utils/index.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
@@ -76,8 +76,8 @@ class AboutPage extends StatelessWidget {
         const ListTile(
           title: Text("致谢"),
           subtitle: Text(
-            "此项目fork自lucinhu/bili_you，并感谢以下项目的作者：\n"
-            "• lucinhu - https://github.com/lucinhu/bili_you\n"
+            "此项目fork自lucinhu/bili_own，并感谢以下项目的作者：\n"
+            "• lucinhu - https://github.com/lucinhu/bili_own\n"
             "• bggRGjQaUbCoE (PiliPlus) - https://github.com/bggRGjQaUbCoE/PiliPlus\n"
             "• orz12 (PiliPalaX) - https://github.com/orz12/PiliPalaX\n"
             "• guozhigq (pilipala) - https://github.com/guozhigq/pilipala",

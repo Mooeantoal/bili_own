@@ -1,7 +1,7 @@
 import 'dart:developer';
-import 'package:bili_you/common/api/index.dart';
-import 'package:bili_you/common/utils/index.dart';
-import 'package:bili_you/pages/login/index.dart';
+import 'package:bili_own/common/api/index.dart';
+import 'package:bili_own/common/utils/index.dart';
+import 'package:bili_own/pages/login/index.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:webview_cookie_manager_plus/webview_cookie_manager_plus.dart';
