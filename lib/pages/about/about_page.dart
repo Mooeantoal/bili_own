@@ -68,7 +68,7 @@ class AboutPage extends StatelessWidget {
                     AssetImage("assets/icon/bili.png"),
                     size: 200,
                   ),
-                  applicationName: "Bili You",
+                  applicationName: "Bili Own",
                 ),
               )),
         ),
@@ -76,8 +76,8 @@ class AboutPage extends StatelessWidget {
         const ListTile(
           title: Text("致谢"),
           subtitle: Text(
-            "此项目fork自lucinhu/bili_own，并感谢以下项目的作者：\n"
-            "• lucinhu - https://github.com/lucinhu/bili_own\n"
+            "此项目fork自lucinhu/bili_you，感谢以下项目的作者：\n"
+            "• lucinhu - https://github.com/lucinhu/bili_you\n"
             "• bggRGjQaUbCoE (PiliPlus) - https://github.com/bggRGjQaUbCoE/PiliPlus\n"
             "• orz12 (PiliPalaX) - https://github.com/orz12/PiliPalaX\n"
             "• guozhigq (pilipala) - https://github.com/guozhigq/pilipala",
