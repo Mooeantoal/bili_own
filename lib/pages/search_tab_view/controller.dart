@@ -41,6 +41,16 @@ class SearchTabViewController extends GetxController {
         duration: const Duration(milliseconds: 500), curve: Curves.linear);
   }
 
+  // 更新搜索关键字的方法
+  void updateSearchKeyword(String newKeyword) {
+    keyWord = newKeyword;
+    // 重置分页
+    currentPage = 1;
+    searchItems.clear();
+    // 刷新数据
+    onRefresh();
+  }
+
 //搜索视频
   Future<bool> loadSearchVideoItemWidgetLists() async {
     late List<SearchVideoItem> list;

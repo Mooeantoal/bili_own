@@ -17,6 +17,12 @@ class SearchResultController extends GetxController
     return '${SearchType.values[index].name}:$tagId';
   }
 
+  // 更新搜索关键字的方法
+  void updateSearchKeyword(String newKeyword) {
+    keyWord = newKeyword;
+    update(); // 通知页面更新
+  }
+
   @override
   void onInit() {
     tabController = TabController(

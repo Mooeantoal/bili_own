@@ -18,6 +18,8 @@ class SearchResultPage extends StatefulWidget {
 class _SearchResultPageState extends State<SearchResultPage>
     with AutomaticKeepAliveClientMixin {
   late SearchResultController controller;
+  late TextEditingController _textController;
+  late FocusNode _focusNode;
   
   @override
   bool get wantKeepAlive => true;
@@ -25,13 +27,22 @@ class _SearchResultPageState extends State<SearchResultPage>
   @override
   void initState() {
     controller = Get.put(SearchResultController(keyWord: widget.keyWord));
+    _textController = TextEditingController(text: widget.keyWord);
+    _focusNode = FocusNode();
     super.initState();
+    
+    // 稍微延迟一下再请求焦点，确保界面已经构建完成
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _focusNode.requestFocus();
+    });
   }
 
   @override
   void dispose() {
     // controller.onClose();
     // controller.onDelete();
+    _textController.dispose();
+    _focusNode.dispose();
     controller.dispose();
     super.dispose();
   }
@@ -44,7 +55,7 @@ class _SearchResultPageState extends State<SearchResultPage>
           padding: const EdgeInsets.all(8),
           decoration: BoxDecoration(
             color: Theme.of(context).colorScheme.surfaceVariant,
-            borderRadius: BorderRadius.circular(4),
+            borderRadius: BorderRadius.circular(20),
           ),
           child: Row(
             children: [
@@ -52,14 +63,36 @@ class _SearchResultPageState extends State<SearchResultPage>
               const SizedBox(width: 8),
               Expanded(
                 child: TextField(
-                  controller: TextEditingController(text: widget.keyWord),
+                  focusNode: _focusNode,
+                  controller: _textController,
                   onSubmitted: (value) {
-                    // 点击搜索按钮或按回车键时跳转到新的搜索页面
-                    Get.to(() => SearchPage());
+                    // 直接在当前页面进行新的搜索
+                    if (value.trim().isNotEmpty) {
+                      // 更新搜索关键字
+                      controller.updateSearchKeyword(value);
+                      // 更新各个tab页面的搜索关键字
+                      for (int i = 0; i < SearchType.values.length; i++) {
+                        try {
+                          final tabController = Get.find<SearchTabViewController>(
+                              tag: controller.getTabTagNameByIndex(i));
+                          tabController.updateSearchKeyword(value);
+                        } catch (e) {
+                          // 如果找不到控制器则忽略
+                        }
+                      }
+                    }
                   },
-                  decoration: const InputDecoration(
+                  decoration: InputDecoration(
                     border: InputBorder.none,
                     hintText: '搜索',
+                    suffixIcon: IconButton(
+                      icon: const Icon(Icons.clear, size: 18),
+                      onPressed: () {
+                        _textController.clear();
+                        // 请求焦点以确保键盘保持打开状态
+                        _focusNode.requestFocus();
+                      },
+                    ),
                   ),
                 ),
               ),

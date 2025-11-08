@@ -21,18 +21,22 @@ class _SearchPageState extends State<SearchPage> {
   );
 
   @override
+  void initState() {
+    super.initState();
+    // 在界面构建完成后请求焦点
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _searchController.searchFocusNode.requestFocus();
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     return Scaffold(
       appBar: AppBar(
         title: const Text('搜索'),
         centerTitle: false, // 标题靠左
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () {
-            Get.back();
-          },
-        ),
+        automaticallyImplyLeading: false, // 取消返回按钮
       ),
       body: Column(
         children: [
