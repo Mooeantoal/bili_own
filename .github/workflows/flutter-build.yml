@@ -1,0 +1,91 @@
+# 工作流名称
+name: Build and Release APK
+
+# 触发条件
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+# 定义作业
+jobs:
+  build:
+    name: Build APK
+    # 使用标准 Runner，避免排队
+    runs-on: ubuntu-latest
+
+    # 作业步骤
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Java 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+          # 暂时禁用 Gradle 缓存，我们要手动清理
+          # cache: gradle
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2.16.0
+        with:
+          channel: 'stable'
+          cache: true
+
+      # 步骤 4: 构建 APK (这是最关键的部分)
+      - name: Build APK
+        run: |
+          echo "Starting ultimate clean build process..."
+
+          # 【最终修复】为 Gradle 增加更多内存
+          export GRADLE_OPTS="-Xmx6g -XX:MaxMetaspaceSize=2g"
+          echo "✅ Increased Gradle memory limit to 6GB."
+
+          # 清理项目，确保一个干净的构建环境
+          flutter clean
+          flutter pub cache clean
+          rm -f pubspec.lock
+          flutter pub get
+          echo "✅ Project cleaned and dependencies fetched."
+
+          # ===================================================================
+          # 【终极补丁】一次性修复所有插件的 compileSdk 版本
+          # ===================================================================
+          echo "Applying universal patch to fix compileSdk for ALL plugins..."
+          find /home/runner/.pub-cache/hosted/pub.dev -name "build.gradle" -path "*/android/*" -exec sed -i -e 's/compileSdkVersion 30/compileSdkVersion 34/g' -e 's/compileSdkVersion 31/compileSdkVersion 34/g' -e 's/compileSdkVersion 33/compileSdkVersion 34/g' {} \;
+          echo "✅ Universal patch applied. All plugins should now use compileSdk 34."
+
+          # ===================================================================
+          # 【补丁 1】修复 webview_cookie_manager 的 AndroidManifest.xml
+          # ===================================================================
+          echo "Applying patch for webview_cookie_manager AndroidManifest.xml..."
+          WEBVIEW_MANIFEST_PATH="/home/runner/.pub-cache/hosted/pub.dev/webview_cookie_manager-2.0.6/android/src/main/AndroidManifest.xml"
+          if [ -f "$WEBVIEW_MANIFEST_PATH" ]; then
+            sed -i '/package="io.flutter.plugins.webview_cookie_manager"/d' "$WEBVIEW_MANIFEST_PATH"
+            echo "✅ webview_cookie_manager patch applied successfully."
+          else
+            echo "⚠️ Warning: webview_cookie_manager manifest not found, skipping patch."
+          fi
+          # ===================================================================
+          
+          # 【终极清理】删除所有 Gradle 缓存，确保构建环境绝对干净
+          echo "🧹 Performing ultimate Gradle cache cleanup..."
+          rm -rf ~/.gradle/caches/
+          rm -rf .gradle/
+          echo "✅ All Gradle caches have been purged."
+
+          # 开始构建 Release 版本的 APK，并按 ABI 分割
+          echo "🚀 Starting ultimate Flutter build..."
+          # 【关键】通过 -P 参数强制禁用所有有问题的优化
+          flutter build apk --release --split-per-abi -P android.enableJetifier=false -P org.gradle.configuration-cache=false -P org.gradle.caching=false
+          echo "🎉 Flutter build finished."
+
+      - name: Upload APK artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-apks
+          path: build/app/outputs/flutter-apk/app-*.apk

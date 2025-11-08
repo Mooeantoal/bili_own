@@ -1,0 +1,23 @@
+allprojects {
+    afterEvaluate { project ->
+        if (project.hasProperty('android')) {
+            project.android {
+                // 为没有指定 compileSdk 的模块设置默认值
+                if (!project.android.hasProperty('compileSdk') || project.android.compileSdk == null) {
+                    compileSdk 34
+                }
+                
+                // 为没有指定 namespace 的模块设置默认值
+                if (!project.android.hasProperty('namespace') || project.android.namespace == null) {
+                    namespace "com.plugin.${project.name.replace(':', '').replace('-', '_')}"
+                }
+            }
+        }
+        
+        // 修复 flutter 扩展找不到的问题
+        if (project.plugins.hasPlugin('com.android.library') && 
+            !project.extensions.findByName('flutter')) {
+            project.extensions.create('flutter', Object.class)
+        }
+    }
+}

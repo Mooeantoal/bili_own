@@ -1,0 +1,130 @@
+name: bili_you
+description: A new Flutter project.
+
+publish_to: 'none'
+
+version: 1.2.0+1
+
+environment:
+  sdk: '>=3.0.0-417.0.dev<4.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  # get
+  get: ^4.6.5
+
+  # Material You 动态配色
+  dynamic_color: 1.6.8
+
+  # 网络相关 
+  dio: ^5.1.1
+  dio_cookie_manager: ^2.1.4
+  cookie_jar: ^3.0.0
+  gt3_flutter_plugin: ^0.1.1
+  flutter_cache_manager: ^3.3.0
+  protobuf: ^2.1.0
+  connectivity_plus: ^5.0.2
+
+  # 加解密
+  encrypt: ^5.0.1
+
+  # 文件路径
+  path: ^1.8.3
+  path_provider: ^2.0.14
+  easy_refresh: ^3.3.1
+
+  # 控件
+  ns_danmaku:
+    git: 
+      url: https://github.com/lucinhu/flutter_ns_danmaku.git
+  cached_network_image: ^3.4.0
+  photo_view: ^0.14.0  
+  card_swiper: ^2.0.4  
+
+  # 播放器
+  media_kit: ^1.0.0
+  media_kit_libs_android_video: ^1.0.4
+  media_kit_libs_ios_video: ^1.0.4
+  media_kit_libs_linux: ^1.0.2
+  media_kit_libs_macos_video: ^1.0.5
+  media_kit_libs_windows_video: ^1.0.2
+  media_kit_video: ^1.0.0
+  media_kit_native_event_loop: ^1.0.3
+
+  # webview
+  webview_flutter: ^4.4.0
+  webview_cookie_manager_plus: ^2.0.17 # 【修正】使用日志建议的正确版本
+
+  # 保持常亮
+  wakelock_plus: ^1.2.1
+
+  # 设备&包信息
+  device_info_plus: ^9.1.2
+  package_info_plus: ^8.0.2
+
+  # url跳转
+  url_launcher: ^6.2.0
+
+  # hive
+  hive: ^2.2.3
+  hive_flutter: ^1.1.0
+
+  # 分享
+  share_plus: ^7.0.0
+
+  # scheme 
+  appscheme: ^1.2.0
+
+  # 音量控制
+  volume_controller: ^2.0.6
+
+  # 亮度控制
+  screen_brightness: ^0.2.2
+
+  rxdart: ^0.27.7
+
+dev_dependencies:
+  build_runner: ^2.4.0
+  test: ^1.24.1
+  flutter_launcher_icons: ^0.13.0
+  flutter_lints: ^3.0.0
+
+flutter:
+  uses-material-design: true
+
+  assets:
+      - assets/icon/bili.png
+
+flutter_icons:
+  android: true
+  ios: true
+  image_path: "assets/icon/bili.png"
+  adaptive_icon_background: "#ffffff"
+  adaptive_icon_foreground: "assets/icon/bili.png"
+  remove_alpha_ios: true
+  min_sdk_android: 21
+  web:
+    generate: true
+    image_path: "assets/icon/bili.png"
+    background_color: "#hexcode"
+    theme_color: "#hexcode"
+  windows:
+    generate: true
+    image_path: "assets/icon/bili.png"
+    icon_size: 48
+  macos:
+    generate: true
+    image_path: "assets/icon/bili.png"
+
+# ===================================================================
+# 【依赖覆盖】
+# 这会强制 webview_flutter 使用官方推荐的 webview_cookie_manager_plus
+dependency_overrides:
+  webview_cookie_manager_plus:
+    hosted:
+      name: webview_cookie_manager_plus
+      url: https://pub.dev
+    version: ^2.0.17
+# ===================================================================
