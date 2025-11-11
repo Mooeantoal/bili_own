@@ -2,11 +2,12 @@ import 'dart:developer';
 
 import 'package:bili_own/common/api/video_operation_api.dart';
 import 'package:bili_own/common/models/local/reply/reply_item.dart';
+import 'package:bili_own/common/models/local/video/video_play_info.dart';
 import 'package:bili_own/common/utils/bvid_avid_util.dart';
 import 'package:bili_own/common/utils/http_utils.dart';
 import 'package:bili_own/pages/about/about_page.dart';
 import 'package:bili_own/pages/bili_video/widgets/reply/index.dart';
-import 'package:bili_own/pages/bili_video/widgets/bili_video_player/bili_video_player.dart';
+import 'package:bili_own/pages/bili_video/widgets/bili_video_player/bili_video_player.dart' as bp;
 import 'package:bili_own/pages/login/password_login/index.dart';
 import 'package:bili_own/pages/login/sms_login/index.dart';
 import 'package:bili_own/pages/ui_test/test_widget/media_kit_test_page.dart';
@@ -22,9 +23,11 @@ class UiTestController extends GetxController {
   UiTestController();
 
   List<ListTile> listTiles = [];
-  BiliVideoPlayerController biliVideoPlayerController =
-      BiliVideoPlayerController(
-          bvid: BvidAvidUtil.av2Bvid(170001), cid: 279786);
+  bp.BiliVideoPlayerController biliVideoPlayerController =
+      bp.BiliVideoPlayerController(
+          videoPlayInfo: VideoPlayInfo.zero,
+          bvid: BvidAvidUtil.av2Bvid(170001), 
+          cid: 279786);
 
   //测试名称,页面对应表
   late Map<String, Widget> _testPages;
@@ -133,7 +136,11 @@ class UiTestController extends GetxController {
       '密码登陆': const PasswordLoginPage(),
       '短信登陆': const PhoneLoginPage(),
       '视频播放测试': Builder(
-        builder: (context) => const BiliVideoPlayer(),
+        builder: (context) => bp.BiliVideoPlayer(
+          videoPlayInfo: VideoPlayInfo.zero,
+          bvid: '',
+          cid: 0,
+        ),
       ),
     };
     //初始化构建测试页面项列表

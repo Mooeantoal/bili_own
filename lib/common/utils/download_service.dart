@@ -2,9 +2,12 @@ import 'dart:io';
 import 'dart:convert';
 import 'package:path/path.dart' as path;
 import 'package:get/get.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:bili_own/common/utils/download_manager.dart';
 import 'package:bili_own/common/models/local/download/download_entry_info.dart';
 import 'package:bili_own/common/models/local/download/download_media_file_info.dart';
+import 'package:bili_own/common/models/local/download/current_download_info.dart';
+import 'package:bili_own/common/models/local/download/bili_download_entry_info.dart';
 import 'package:bili_own/common/api/video_play_api.dart';
 import 'package:bili_own/common/utils/bili_own_storage.dart';
 
@@ -40,8 +43,9 @@ class DownloadService extends GetxController implements DownloadCallback {
   }
 
   // 读取下载列表
-  void _readDownloadList() {
-    final downloadDir = Directory(_getDownloadPath());
+  void _readDownloadList() async {
+    final downloadPath = await _getDownloadPath();
+    final downloadDir = Directory(downloadPath);
     if (!downloadDir.existsSync()) {
       downloadDir.createSync(recursive: true);
       return;
@@ -110,8 +114,8 @@ class DownloadService extends GetxController implements DownloadCallback {
   }
 
   // 创建下载任务
-  void createDownload(DownloadEntryInfo entry) {
-    final entryDir = _getDownloadFileDir(entry);
+  void createDownload(DownloadEntryInfo entry) async {
+    final entryDir = await _getDownloadFileDir(entry);
     
     // 保存视频信息
     final entryJsonFile = File(path.join(entryDir.path, "entry.json"));
@@ -160,8 +164,12 @@ class DownloadService extends GetxController implements DownloadCallback {
   // 开始下载
   void startDownload(DownloadEntryAndPathInfo biliDownInfo) async {
     // 取消当前任务
-    _downloadManager?.cancel();
-    _audioDownloadManager?.cancel();
+    if (_downloadManager != null) {
+      _downloadManager!.cancelDownload(_currentTaskId.toString());
+    }
+    if (_audioDownloadManager != null) {
+      _audioDownloadManager!.cancelDownload(_currentTaskId.toString());
+    }
     _downloadManager = null;
     _audioDownloadManager = null;
 
@@ -173,16 +181,34 @@ class DownloadService extends GetxController implements DownloadCallback {
     final id = entry.source?.cid ?? entry.pageData?.cid ?? 0;
     _currentTaskId = _idCounter++;
 
+    // 创建BiliDownloadEntryInfo对象
+    final biliEntryInfo = BiliDownloadEntryInfo(
+      title: entry.title,
+      cover: entry.cover ?? "",
+      preferedVideoQuality: entry.preferedVideoQuality ?? 0,
+      durlBackupUrl: "",
+      totalBytes: entry.totalBytes,
+      downloadedBytes: entry.downloadedBytes,
+      filePath: entryDir.path,
+      taskId: _currentTaskId.toString(),
+      type: "video",
+      state: 0,
+      errorMsg: "",
+      createTime: DateTime.now().millisecondsSinceEpoch,
+      finishTime: 0,
+      aid: entry.avid?.toString() ?? "",
+      cid: entry.pageData?.cid?.toString() ?? "",
+      bvid: entry.bvid ?? "",
+      seasonId: entry.seasonId ?? "",
+      episodeId: entry.ep?.episodeId?.toString() ?? "",
+      upName: "",
+      upMid: "",
+    );
+
+    // 创建CurrentDownloadInfo对象
     final currentDownloadInfo = CurrentDownloadInfo(
-      taskId: _currentTaskId,
-      parentDirPath: entryDir.parent.path,
-      parentId: parentId,
-      id: id,
-      name: entry.name,
-      url: "",
-      size: entry.totalBytes,
-      progress: entry.downloadedBytes,
-      length: entry.totalTimeMilli,
+      entryInfo: biliEntryInfo,
+      mediaFiles: [],
     );
 
     // 检查弹幕文件是否存在
@@ -216,6 +242,8 @@ class DownloadService extends GetxController implements DownloadCallback {
     final entry = biliDownInfo.entry;
     final entryDir = Directory(biliDownInfo.entryDirPath);
     final videoDir = Directory(path.join(entryDir.path, entry.videoDirName));
+    final parentId = entry.seasonId ?? entry.avid?.toString() ?? "";
+    final id = entry.source?.cid ?? entry.pageData?.cid ?? 0;
     
     if (!videoDir.existsSync()) {
       videoDir.createSync(recursive: true);
@@ -237,12 +265,42 @@ class DownloadService extends GetxController implements DownloadCallback {
       }
 
       if (mediaFileInfo is Type2MediaFileInfo) {
-        _downloadManager = DownloadManager(
-          downloadInfo: currentDownloadInfo.copyWith(
+        _downloadManager = DownloadManager.withParams(
+          downloadInfo: CurrentDownloadInfo(
+            entryInfo: BiliDownloadEntryInfo(
+              title: entry.title,
+              cover: entry.cover ?? "",
+              preferedVideoQuality: entry.preferedVideoQuality ?? 0,
+              durlBackupUrl: "",
+              totalBytes: entry.totalBytes,
+              downloadedBytes: entry.downloadedBytes,
+              filePath: entryDir.path,
+              taskId: _currentTaskId.toString(),
+              type: "video",
+              state: 0,
+              errorMsg: "",
+              createTime: DateTime.now().millisecondsSinceEpoch,
+              finishTime: 0,
+              aid: entry.avid?.toString() ?? "",
+              cid: entry.pageData?.cid?.toString() ?? "",
+              bvid: entry.bvid ?? "",
+              seasonId: entry.seasonId ?? "",
+              episodeId: entry.ep?.episodeId?.toString() ?? "",
+              upName: "",
+              upMid: "",
+            ),
+            mediaFiles: [],
+            taskId: _currentTaskId,
+            parentDirPath: entryDir.parent.path,
+            parentId: parentId,
+            id: id,
+            name: entry.name,
             url: mediaFileInfo.video.first.baseUrl,
-            header: httpHeader,
             size: entry.totalBytes,
             length: mediaFileInfo.duration,
+            progress: entry.downloadedBytes,
+            status: 0,
+            header: httpHeader,
           ),
           callback: this,
         );
@@ -253,17 +311,42 @@ class DownloadService extends GetxController implements DownloadCallback {
 
         final audio = mediaFileInfo.audio;
         if (audio != null && audio.isNotEmpty) {
-          _audioDownloadManager = DownloadManager(
+          _audioDownloadManager = DownloadManager.withParams(
             downloadInfo: CurrentDownloadInfo(
-              taskId: currentDownloadInfo.taskId,
-              parentDirPath: currentDownloadInfo.parentDirPath,
-              parentId: currentDownloadInfo.parentId,
-              id: currentDownloadInfo.id,
+              entryInfo: BiliDownloadEntryInfo(
+                title: entry.title,
+                cover: entry.cover ?? "",
+                preferedVideoQuality: entry.preferedVideoQuality ?? 0,
+                durlBackupUrl: "",
+                totalBytes: audio.first.size,
+                downloadedBytes: 0,
+                filePath: entryDir.path,
+                taskId: _currentTaskId.toString(),
+                type: "audio",
+                state: 0,
+                errorMsg: "",
+                createTime: DateTime.now().millisecondsSinceEpoch,
+                finishTime: 0,
+                aid: entry.avid?.toString() ?? "",
+                cid: entry.pageData?.cid?.toString() ?? "",
+                bvid: entry.bvid ?? "",
+                seasonId: entry.seasonId ?? "",
+                episodeId: entry.ep?.episodeId?.toString() ?? "",
+                upName: "",
+                upMid: "",
+              ),
+              mediaFiles: [],
+              taskId: _currentTaskId,
+              parentDirPath: entryDir.parent.path,
+              parentId: parentId,
+              id: id,
               name: entry.name,
               url: audio.first.baseUrl,
-              header: httpHeader,
               size: audio.first.size,
               length: mediaFileInfo.duration,
+              progress: 0,
+              status: 0,
+              header: httpHeader,
             ),
             callback: _AudioDownloadCallback(this),
           );
@@ -350,8 +433,8 @@ class DownloadService extends GetxController implements DownloadCallback {
   }
 
   // 获取下载路径
-  String _getDownloadPath() {
-    final appDocDir = BiliOwnStorage.getApplicationSupportDirectory();
+  Future<String> _getDownloadPath() async {
+    final appDocDir = await getApplicationSupportDirectory();
     final downloadDir = Directory(path.join(appDocDir.path, "download"));
     if (!downloadDir.existsSync()) {
       downloadDir.createSync(recursive: true);
@@ -360,7 +443,7 @@ class DownloadService extends GetxController implements DownloadCallback {
   }
 
   // 获取下载文件目录
-  Directory _getDownloadFileDir(DownloadEntryInfo entry) {
+  Future<Directory> _getDownloadFileDir(DownloadEntryInfo entry) async {
     String dirName = "";
     String pageDirName = "";
 
@@ -374,7 +457,8 @@ class DownloadService extends GetxController implements DownloadCallback {
       pageDirName = "c_${entry.pageData!.cid}";
     }
 
-    final downloadDir = Directory(path.join(_getDownloadPath(), dirName));
+    final downloadPath = await _getDownloadPath();
+    final downloadDir = Directory(path.join(downloadPath, dirName));
     if (!downloadDir.existsSync()) {
       downloadDir.createSync(recursive: true);
     }
@@ -460,6 +544,8 @@ extension CurrentDownloadInfoCopyWith on CurrentDownloadInfo {
     Map<String, String>? header,
   }) {
     return CurrentDownloadInfo(
+      entryInfo: this.entryInfo,
+      mediaFiles: this.mediaFiles,
       taskId: taskId ?? this.taskId,
       parentDirPath: parentDirPath ?? this.parentDirPath,
       parentId: parentId ?? this.parentId,

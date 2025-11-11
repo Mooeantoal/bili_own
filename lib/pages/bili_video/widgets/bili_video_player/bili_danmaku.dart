@@ -94,7 +94,7 @@ class _BiliDanmakuState extends State<BiliDanmaku> {
   Future<void> _requestDanmaku() async {
     widget.controller.dmSegList.clear();
     widget.controller.segmentCount =
-        (widget.controller.biliVideoPlayerController.videoPlayInfo!.timeLength /
+        (widget.controller.biliVideoPlayerController.videoPlayInfo.timeLength /
                 (60 * 6))
             .ceil();
     for (int segmentIndex = 1;
@@ -189,10 +189,9 @@ class _BiliDanmakuState extends State<BiliDanmaku> {
 
   @override
   void dispose() {
-    if (!widget.controller.biliVideoPlayerController.isFullScreen) {
-      danmakuController?.clear();
-      danmakuController = null;
-    }
+    // 在dispose时清除弹幕控制器
+    danmakuController?.clear();
+    danmakuController = null;
     removeAllListeners();
     super.dispose();
   }

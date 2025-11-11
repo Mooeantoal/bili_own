@@ -371,6 +371,19 @@ class _IntroductionOperationButtonsState
               onPressed: widget.controller.onAddSharePressed,
             )),
         const Spacer(),
+        // 添加下载按钮
+        SizedBox(
+            width: buttonWidth,
+            height: buttonHeight,
+            child: IconTextButton(
+              icon: const Icon(Icons.download_rounded),
+              text: Text(
+                "下载",
+                style: operationButtonTextStyle,
+              ),
+              onPressed: widget.controller.onDownloadPressed,
+            )),
+        const Spacer(),
       ],
     );
   }

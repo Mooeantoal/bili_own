@@ -9,7 +9,7 @@ import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import 'package:get/get.dart';
 import 'package:bili_own/common/api/home_api.dart';
 
-class PopularVideoController {
+class PopularVideoController extends GetxController {
   PopularVideoController();
   List<VideoTileInfo> videoItems = [];
 

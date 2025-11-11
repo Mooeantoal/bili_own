@@ -12,6 +12,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import 'package:get/get.dart';
 import 'package:share_plus/share_plus.dart';
+// 添加下载相关的导入
+import 'package:bili_own/pages/download/download_service.dart';
+import 'package:bili_own/common/models/local/download/bili_download_entry_info.dart';
+import 'package:bili_own/common/models/local/download/bili_download_media_file_info.dart';
+import 'package:bili_own/common/api/video_play_api.dart';
+import 'package:bili_own/common/models/local/video/video_play_item.dart';
+import 'package:bili_own/common/models/local/video/audio_play_item.dart';
+import 'package:bili_own/common/utils/bili_own_storage.dart';
 
 class IntroductionController extends GetxController {
   IntroductionController(
@@ -194,6 +202,95 @@ class IntroductionController extends GetxController {
       Get.rawSnackbar(message: '分享失败:$e');
     }
     refreshOperationButton!.call();
+  }
+
+  // 添加下载功能
+  Future<void> onDownloadPressed() async {
+    try {
+      // 获取下载服务
+      final downloadService = Get.find<DownloadService>();
+      
+      // 加载视频播放信息
+      final videoPlayInfo = await VideoPlayApi.getVideoPlay(bvid: bvid, cid: int.parse(cid?.toString() ?? "0"));
+      
+      // 获取视频和音频信息
+      final videoItem = videoPlayInfo.videos.first; // 选择第一个视频（最高质量）
+      final audioItem = videoPlayInfo.audios.first; // 选择第一个音频
+      
+      // 创建下载条目信息
+      final downloadEntryInfo = BiliDownloadEntryInfo(
+        title: videoInfo.title,
+        cover: videoInfo.ownerFace, // 使用UP主头像作为封面
+        preferedVideoQuality: videoItem.quality.index,
+        durlBackupUrl: videoItem.urls.length > 1 ? videoItem.urls[1] : "", // 备用URL
+        totalBytes: videoItem.bandWidth, // 视频总字节数
+        downloadedBytes: 0, // 已下载字节数
+        filePath: "", // 下载文件路径
+        taskId: DateTime.now().millisecondsSinceEpoch.toString(), // 任务ID
+        type: "video", // 下载类型
+        state: 0, // 下载状态
+        errorMsg: "", // 错误信息
+        createTime: DateTime.now().millisecondsSinceEpoch, // 创建时间
+        finishTime: 0, // 完成时间
+        aid: videoInfo.bvid, // BV号作为aid
+        cid: cid?.toString() ?? "", // CID
+        bvid: bvid, // BV号
+        seasonId: "", // 番剧ID
+        episodeId: "", // 剧集ID
+        upName: videoInfo.ownerName, // UP主名称
+        upMid: videoInfo.ownerMid.toString(), // UP主ID
+      );
+      
+      // 创建媒体文件信息列表
+      final mediaFiles = <BiliDownloadMediaFileInfo>[
+        // 视频文件信息
+        BiliDownloadMediaFileInfo(
+          quality: videoItem.quality.index,
+          qualityString: VideoQualityDescription(videoItem.quality).description, // 使用扩展获取描述
+          fileSize: videoItem.bandWidth,
+          filePath: "", // 下载文件路径
+          taskId: downloadEntryInfo.taskId,
+          state: 0, // 下载状态
+          errorMsg: "", // 错误信息
+          downloadedBytes: 0, // 已下载字节数
+          downloadUrl: videoItem.urls.first, // 下载URL
+          backupUrl: videoItem.urls.length > 1 ? videoItem.urls[1] : "", // 备用URL
+          createTime: DateTime.now().millisecondsSinceEpoch, // 创建时间
+          finishTime: 0, // 完成时间
+        ),
+        // 音频文件信息
+        BiliDownloadMediaFileInfo(
+          quality: audioItem.quality.index,
+          qualityString: AudioQualityDescription(audioItem.quality).description, // 使用扩展获取描述
+          fileSize: audioItem.bandWidth,
+          filePath: "", // 下载文件路径
+          taskId: downloadEntryInfo.taskId,
+          state: 0, // 下载状态
+          errorMsg: "", // 错误信息
+          downloadedBytes: 0, // 已下载字节数
+          downloadUrl: audioItem.urls.first, // 下载URL
+          backupUrl: audioItem.urls.length > 1 ? audioItem.urls[1] : "", // 备用URL
+          createTime: DateTime.now().millisecondsSinceEpoch, // 创建时间
+          finishTime: 0, // 完成时间
+        ),
+      ];
+      
+      // 添加到下载队列
+      await downloadService.addToDownloadQueue(downloadEntryInfo, mediaFiles);
+      
+      // 显示提示信息
+      Get.snackbar(
+        "开始下载",
+        "已添加到下载队列",
+        snackPosition: SnackPosition.BOTTOM,
+      );
+    } catch (e) {
+      Get.snackbar(
+        "下载失败",
+        "添加到下载队列失败: $e",
+        snackPosition: SnackPosition.BOTTOM,
+      );
+    }
   }
 
   @override

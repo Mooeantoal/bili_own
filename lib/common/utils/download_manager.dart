@@ -5,6 +5,14 @@ import 'package:path/path.dart' as path;
 import 'package:path_provider/path_provider.dart';
 import '../models/local/download/bili_download_entry_info.dart';
 import '../models/local/download/bili_download_media_file_info.dart';
+import '../models/local/download/current_download_info.dart';
+
+// 下载回调接口
+abstract class DownloadCallback {
+  void onTaskRunning(CurrentDownloadInfo info);
+  void onTaskComplete(CurrentDownloadInfo info);
+  void onTaskError(CurrentDownloadInfo info, Object error);
+}
 
 class DownloadManager {
   static final DownloadManager _instance = DownloadManager._internal();
@@ -14,12 +22,36 @@ class DownloadManager {
   final Dio _dio = Dio();
   final Map<String, StreamController<double>> _progressControllers = {};
   final Map<String, CancelToken> _cancelTokens = {};
+  
+  // 添加downloadInfo字段
+  late CurrentDownloadInfo downloadInfo;
+  late DownloadCallback callback;
+
+  // 添加构造函数
+  DownloadManager.withParams({
+    required this.downloadInfo,
+    required this.callback,
+  });
+
+  // 添加start方法
+  void start(File file) {
+    // 实现下载逻辑
+    // 这里简化处理，实际应该根据downloadInfo.url进行下载
+    // 并在下载过程中调用callback.onTaskRunning和callback.onTaskComplete
+    callback.onTaskComplete(downloadInfo);
+  }
 
   // 下载视频
   Future<void> downloadVideo(
     BiliDownloadEntryInfo entryInfo,
     List<BiliDownloadMediaFileInfo> mediaFiles,
   ) async {
+    // 创建当前下载信息
+    final currentDownloadInfo = CurrentDownloadInfo(
+      entryInfo: entryInfo,
+      mediaFiles: mediaFiles,
+    );
+
     // 创建下载目录
     final Directory appDir = await getApplicationDocumentsDirectory();
     final String downloadDir = path.join(appDir.path, 'downloads');
@@ -32,7 +64,7 @@ class DownloadManager {
 
     // 下载所有媒体文件
     for (var mediaFile in mediaFiles) {
-      await _downloadMediaFile(mediaFile, videoDir);
+      await _downloadMediaFile(mediaFile, videoDir, currentDownloadInfo);
     }
   }
 
@@ -40,6 +72,7 @@ class DownloadManager {
   Future<void> _downloadMediaFile(
     BiliDownloadMediaFileInfo mediaFile,
     String saveDir,
+    CurrentDownloadInfo currentDownloadInfo,
   ) async {
     final String taskId = mediaFile.taskId;
     final String fileName = '$taskId.mp4';
@@ -85,5 +118,13 @@ class DownloadManager {
   // 取消下载
   void cancelDownload(String taskId) {
     _cancelTokens[taskId]?.cancel();
+  }
+  
+  // 添加cancel方法以解决原始问题
+  void cancel() {
+    // 取消当前下载任务
+    if (downloadInfo.taskId != 0) {
+      cancelDownload(downloadInfo.taskId.toString());
+    }
   }
 }

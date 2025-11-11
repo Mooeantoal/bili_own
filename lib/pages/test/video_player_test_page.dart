@@ -4,6 +4,11 @@ import 'package:bili_own/pages/bili_video/widgets/bili_video_player/bili_video_p
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
+// 添加必要的导入
+import 'package:bili_own/common/models/local/video/video_play_info.dart';
+import 'package:bili_own/common/models/local/video/video_play_item.dart';
+import 'package:bili_own/common/models/local/video/audio_play_item.dart';
+
 class VideoPlayerTestPage extends StatelessWidget {
   const VideoPlayerTestPage({Key? key}) : super(key: key);
 
@@ -31,8 +36,37 @@ class _VideoPlayerTestContentState extends State<VideoPlayerTestContent> {
   @override
   void initState() {
     super.initState();
+    // 创建测试用的VideoPlayInfo对象
+    final testVideoPlayInfo = VideoPlayInfo(
+      supportVideoQualities: [VideoQuality.high720p],
+      supportAudioQualities: [AudioQuality.audio64k],
+      timeLength: 1000,
+      videos: [
+        VideoPlayItem(
+          urls: ['https://example.com/test-video.mp4'],
+          quality: VideoQuality.high720p,
+          bandWidth: 1000000,
+          codecs: 'avc1.64001F',
+          width: 1280,
+          height: 720,
+          frameRate: 30.0,
+        )
+      ],
+      audios: [
+        AudioPlayItem(
+          urls: ['https://example.com/test-audio.mp4'],
+          quality: AudioQuality.audio64k,
+          bandWidth: 64000,
+          codecs: 'mp4a.40.2',
+        )
+      ],
+      lastPlayCid: 279786,
+      lastPlayTime: Duration.zero,
+    );
+
     // 初始化播放器控制器，使用测试视频
     _controller = BiliVideoPlayerController(
+      videoPlayInfo: testVideoPlayInfo,
       bvid: BvidAvidUtil.av2Bvid(170001), // 测试视频BV号
       cid: 279786, // 测试视频CID
     );
@@ -54,7 +88,7 @@ class _VideoPlayerTestContentState extends State<VideoPlayerTestContent> {
           heroTagId: 999,
           buildControllPanel: () {
             return BiliVideoPlayerPanel(
-              BiliVideoPlayerPanelController(_controller),
+              controller: BiliVideoPlayerPanelController(_controller),
             );
           },
         ),
