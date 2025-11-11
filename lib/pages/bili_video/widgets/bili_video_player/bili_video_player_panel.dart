@@ -1,5 +1,6 @@
 import 'dart:developer';
 import 'dart:math' as math;
+import 'dart:io' show Platform;
 
 import 'package:bili_own/common/models/local/video/audio_play_item.dart';
 import 'package:bili_own/common/models/local/video/video_play_item.dart';
@@ -8,9 +9,19 @@ import 'package:bili_own/common/utils/string_format_utils.dart';
 import 'package:bili_own/common/widget/video_audio_player.dart';
 import 'package:bili_own/pages/bili_video/widgets/bili_video_player/bili_video_player.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
+import 'package:flutter/services.dart' show HapticFeedback;
+import 'package:get/get.dart';
 import 'package:screen_brightness/screen_brightness.dart';
 import 'package:volume_controller/volume_controller.dart';
+
+// 添加下载服务导入
+import 'package:bili_own/pages/download/download_service.dart';
+import 'package:bili_own/common/models/local/download/bili_download_entry_info.dart';
+import 'package:bili_own/common/models/local/download/bili_download_media_file_info.dart';
+
+import '../../index.dart';
+// import '../../../controller.dart';  // 删除错误的导入
+// import '../../../../../common/widget/video_audio_player.dart';  // 删除重复的导入
 
 class BiliVideoPlayerPanel extends StatefulWidget {
   const BiliVideoPlayerPanel(this.controller, {super.key});
@@ -300,7 +311,23 @@ class _BiliVideoPlayerPanelState extends State<BiliVideoPlayerPanel> {
                               PopupMenuItem(
                                   value: "音质",
                                   child: Text(
-                                      "音质: ${widget.controller._biliVideoPlayerController.audioPlayItem!.quality.description ?? "未知"}"))
+                                      "音质: ${widget.controller._biliVideoPlayerController.audioPlayItem!.quality.description ?? "未知"}")),
+                              // 添加下载选项
+                              const PopupMenuItem(
+                                padding: EdgeInsets.zero,
+                                value: "下载",
+                                child: Row(
+                                  children: [
+                                    Padding(
+                                        padding: EdgeInsets.all(12),
+                                        child: Icon(
+                                          Icons.download_rounded,
+                                          size: 24,
+                                        )),
+                                    Text("下载视频")
+                                  ],
+                                ),
+                              ),
                             ];
                           },
                           onSelected: (value) {
@@ -418,6 +445,10 @@ class _BiliVideoPlayerPanelState extends State<BiliVideoPlayerPanel> {
                                     );
                                   },
                                 );
+                                break;
+                              // 添加下载处理逻辑
+                              case "下载":
+                                _downloadVideo();
                                 break;
                               default:
                                 log(value);
@@ -546,6 +577,88 @@ class _BiliVideoPlayerPanelState extends State<BiliVideoPlayerPanel> {
             ))
       ],
     );
+  }
+
+  void _downloadVideo() {
+    final videoPlayInfo = widget.controller._biliVideoPlayerController.videoPlayInfo;
+    if (videoPlayInfo != null) {
+      final videoItem = widget.controller._biliVideoPlayerController.videoPlayItem;
+      final audioItem = widget.controller._biliVideoPlayerController.audioPlayItem;
+      final downloadService = Get.find<DownloadService>();
+      
+      // 创建下载条目信息
+      final downloadEntryInfo = BiliDownloadEntryInfo(
+        title: "视频标题", // 需要从视频信息中获取实际标题
+        cover: "", // 视频封面URL
+        preferedVideoQuality: videoItem?.quality.index ?? 0,
+        durlBackupUrl: "", // 备用URL
+        totalBytes: 0, // 视频总字节数
+        downloadedBytes: 0, // 已下载字节数
+        filePath: "", // 下载文件路径
+        taskId: DateTime.now().millisecondsSinceEpoch.toString(), // 任务ID
+        type: "video", // 下载类型
+        state: 0, // 下载状态
+        errorMsg: "", // 错误信息
+        createTime: DateTime.now().millisecondsSinceEpoch, // 创建时间
+        finishTime: 0, // 完成时间
+        aid: "", // AV号
+        cid: widget.controller._biliVideoPlayerController.cid.toString(), // CID
+        bvid: widget.controller._biliVideoPlayerController.bvid, // BV号
+        seasonId: "", // 番剧ID
+        episodeId: "", // 剧集ID
+        upName: "", // UP主名称
+        upMid: "", // UP主ID
+      );
+      
+      // 创建媒体文件信息列表
+      final mediaFiles = <BiliDownloadMediaFileInfo>[];
+      
+      // 如果有视频项，添加视频文件信息
+      if (videoItem != null) {
+        mediaFiles.add(BiliDownloadMediaFileInfo(
+          quality: videoItem.quality.index,
+          qualityString: videoItem.quality.description,
+          fileSize: 0, // 文件大小
+          filePath: "", // 文件路径
+          taskId: downloadEntryInfo.taskId,
+          state: 0, // 状态
+          errorMsg: "", // 错误信息
+          downloadedBytes: 0, // 已下载字节数
+          downloadUrl: videoItem.urls.isNotEmpty ? videoItem.urls.first : "", // 下载URL
+          backupUrl: "", // 备用URL
+          createTime: DateTime.now().millisecondsSinceEpoch, // 创建时间
+          finishTime: 0, // 完成时间
+        ));
+      }
+      
+      // 如果有音频项，添加音频文件信息
+      if (audioItem != null) {
+        mediaFiles.add(BiliDownloadMediaFileInfo(
+          quality: audioItem.quality.index,
+          qualityString: audioItem.quality.description,
+          fileSize: 0, // 文件大小
+          filePath: "", // 文件路径
+          taskId: downloadEntryInfo.taskId,
+          state: 0, // 状态
+          errorMsg: "", // 错误信息
+          downloadedBytes: 0, // 已下载字节数
+          downloadUrl: audioItem.urls.isNotEmpty ? audioItem.urls.first : "", // 下载URL
+          backupUrl: "", // 备用URL
+          createTime: DateTime.now().millisecondsSinceEpoch, // 创建时间
+          finishTime: 0, // 完成时间
+        ));
+      }
+      
+      // 添加到下载队列
+      downloadService.addToDownloadQueue(downloadEntryInfo, mediaFiles);
+      
+      // 显示提示信息
+      Get.snackbar(
+        "开始下载",
+        "已添加到下载队列",
+        snackPosition: SnackPosition.BOTTOM,
+      );
+    }
   }
 }
 

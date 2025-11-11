@@ -8,6 +8,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:media_kit/media_kit.dart';
+// 导入下载服务
+import 'package:bili_own/pages/download/download_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -32,6 +34,8 @@ class MyApp extends StatelessWidget {
       return GetMaterialApp(
           onInit: () async {
             await HttpUtils().init();
+            // 初始化下载服务
+            Get.put(DownloadService());
           },
           navigatorObservers: [BiliVideoPage.routeObserver],
           useInheritedMediaQuery: true,

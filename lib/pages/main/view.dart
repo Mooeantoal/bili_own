@@ -88,6 +88,11 @@ class _MainPageState extends State<MainPage> {
                 label: "搜索",
               ),
               NavigationDestination(
+                icon: Icon(Icons.download_outlined), // 更改为下载图标
+                selectedIcon: Icon(Icons.download), // 更改为下载图标
+                label: "下载",
+              ),
+              NavigationDestination(
                 icon: Icon(Icons.person_outline),
                 selectedIcon: Icon(Icons.person),
                 label: "我的",
