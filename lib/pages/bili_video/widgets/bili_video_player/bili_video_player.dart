@@ -6,7 +6,9 @@ import 'package:bili_own/common/models/local/video/audio_play_item.dart';
 import 'package:bili_own/common/models/local/video/video_play_info.dart';
 import 'package:bili_own/common/models/local/video/video_play_item.dart';
 import 'package:bili_own/common/utils/index.dart';
+import 'package:bili_own/common/utils/fullscreen.dart';
 import 'package:bili_own/common/widget/video_audio_player.dart';
+import 'package:bili_own/pages/bili_video/widgets/bili_video_player/bili_video_player_panel.dart';
 import 'package:bili_own/pages/bili_video/widgets/bili_video_player/bili_danmaku.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -57,6 +59,8 @@ class _BiliVideoPlayerWidgetState extends State<BiliVideoPlayerWidget> {
       widget.controller.biliDanmakuController = danmaku?.controller;
       widget.controller.buildDanmaku = widget.buildDanmaku;
       widget.controller.buildControllPanel = widget.buildControllPanel;
+      // 初始化面板控制器
+      widget.controller._panelController = widget.controller.buildControllPanel?.call() as BiliVideoPlayerPanelController?;
     }
     widget.controller._isInitializedState = true;
 
@@ -157,6 +161,7 @@ class BiliVideoPlayerController {
   late Function() updateWidget;
   late BiliDanmaku Function()? buildDanmaku;
   late Widget Function()? buildControllPanel;
+  BiliVideoPlayerPanelController? _panelController;
   VideoAudioController? _videoAudioController;
   BiliDanmakuController? biliDanmakuController;
   VideoPlayInfo? videoPlayInfo;
@@ -320,19 +325,19 @@ class BiliVideoPlayerController {
       //退出全屏
       isFullScreen = false;
       Navigator.pop(Get.context!);
-      await SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge,
-          overlays: [SystemUiOverlay.top, SystemUiOverlay.bottom]);
-      await SystemChrome.setPreferredOrientations([
-        DeviceOrientation.portraitUp,
-      ]);
+      await exitFullScreen();
+      await portraitUp();
+      //重置面板显示状态
+      _panelController?.setShow(true);
     } else {
       //进入全屏
       isFullScreen = true;
-      await SystemChrome.setEnabledSystemUIMode(
-        SystemUiMode.immersiveSticky,
-      );
-      await SystemChrome.setPreferredOrientations(
-          [DeviceOrientation.landscapeLeft, DeviceOrientation.landscapeRight]);
+      await enterFullScreen();
+      if (videoAspectRatio >= 1) {
+        await landScape();
+      } else {
+        await portraitUp();
+      }
       showDialog(
         context: Get.context!,
         useSafeArea: false,

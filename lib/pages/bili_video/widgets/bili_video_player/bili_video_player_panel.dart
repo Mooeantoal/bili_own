@@ -33,6 +33,12 @@ class BiliVideoPlayerPanelController {
 
   BiliVideoPlayerController get biliVideoPlayerController =>
       _biliVideoPlayerController;
+
+  void setShow(bool show) {
+    _show = show;
+  }
+
+  bool get show => _show;
 }
 
 class BiliVideoPlayerPanel extends StatefulWidget {
