@@ -47,10 +47,19 @@ class BiliVideoPlayerController {
       audioPlayItem = videoPlayInfo.audios.first;
     }
 
+    // 检查是否有可用的视频或音频URL
+    final videoUrl = videoPlayItem?.urls.firstOrNull ?? '';
+    final audioUrl = audioPlayItem?.urls.firstOrNull ?? '';
+    
+    if (videoUrl.isEmpty && audioUrl.isEmpty) {
+      print("没有可用的视频或音频URL");
+      return;
+    }
+
     // 创建视频音频控制器
     _videoAudioController = VideoAudioController(
-      videoUrl: videoPlayItem?.urls.first ?? '',
-      audioUrl: audioPlayItem?.urls.first ?? '',
+      videoUrl: videoUrl,
+      audioUrl: audioUrl,
       videoHeaders: VideoPlayApi.videoPlayerHttpHeaders,
       audioHeaders: VideoPlayApi.videoPlayerHttpHeaders,
       autoWakelock: true,
@@ -58,7 +67,9 @@ class BiliVideoPlayerController {
     );
 
     // 初始化控制器
-    await _videoAudioController!.init();
+    if (_videoAudioController != null) {
+      await _videoAudioController!.init();
+    }
   }
 
   Future<void> play() async {
@@ -116,22 +127,35 @@ class BiliVideoPlayerController {
     this.bvid = bvid;
     this.cid = cid;
     await _videoAudioController?.dispose();
-    // 重新获取视频播放信息
-    final videoPlayInfo = await VideoPlayApi.getVideoPlay(bvid: bvid, cid: cid);
-    if (videoPlayInfo.videos.isNotEmpty) {
-      videoPlayItem = videoPlayInfo.videos.first;
+    try {
+      // 重新获取视频播放信息
+      final videoPlayInfo = await VideoPlayApi.getVideoPlay(bvid: bvid, cid: cid);
+      if (videoPlayInfo.videos.isNotEmpty) {
+        videoPlayItem = videoPlayInfo.videos.first;
+      }
+      if (videoPlayInfo.audios.isNotEmpty) {
+        audioPlayItem = videoPlayInfo.audios.first;
+      }
+      
+      final videoUrl = videoPlayItem?.urls.firstOrNull ?? '';
+      final audioUrl = audioPlayItem?.urls.firstOrNull ?? '';
+      
+      if (videoUrl.isEmpty && audioUrl.isEmpty) {
+        print("没有可用的视频或音频URL");
+        return;
+      }
+      
+      _videoAudioController = VideoAudioController(
+        videoUrl: videoUrl,
+        audioUrl: audioUrl,
+        videoHeaders: VideoPlayApi.videoPlayerHttpHeaders,
+        audioHeaders: VideoPlayApi.videoPlayerHttpHeaders,
+        autoWakelock: true,
+      );
+      await _videoAudioController!.refresh();
+    } catch (e) {
+      print("切换视频失败: $e");
     }
-    if (videoPlayInfo.audios.isNotEmpty) {
-      audioPlayItem = videoPlayInfo.audios.first;
-    }
-    _videoAudioController = VideoAudioController(
-      videoUrl: videoPlayItem?.urls.first ?? '',
-      audioUrl: audioPlayItem?.urls.first ?? '',
-      videoHeaders: VideoPlayApi.videoPlayerHttpHeaders,
-      audioHeaders: VideoPlayApi.videoPlayerHttpHeaders,
-      autoWakelock: true,
-    );
-    await _videoAudioController!.refresh();
   }
 
   void addStateChangedListener(Function(VideoAudioState state) listener) {
@@ -272,7 +296,7 @@ class BiliVideoPlayerWidget extends StatefulWidget {
 
 class _BiliVideoPlayerWidgetState extends State<BiliVideoPlayerWidget>
     with TickerProviderStateMixin {
-  late final VideoAudioPlayer _videoAudioPlayer;
+  VideoAudioPlayer? _videoAudioPlayer;
   late final AnimationController _animationController;
   late final Animation<double> _animation;
 
@@ -281,7 +305,25 @@ class _BiliVideoPlayerWidgetState extends State<BiliVideoPlayerWidget>
 
   @override
   void initState() {
-    _videoAudioPlayer = VideoAudioPlayer(widget.controller._videoAudioController!);
+    // 检查控制器是否已初始化
+    if (widget.controller._videoAudioController == null) {
+      // 延迟初始化以确保视频信息已加载
+      Future.microtask(() async {
+        try {
+          await widget.controller.init();
+          if (mounted && widget.controller._videoAudioController != null) {
+            setState(() {
+              _videoAudioPlayer = VideoAudioPlayer(widget.controller._videoAudioController!);
+            });
+          }
+        } catch (e) {
+          print("初始化视频播放器失败: $e");
+        }
+      });
+    } else {
+      _videoAudioPlayer = VideoAudioPlayer(widget.controller._videoAudioController!);
+    }
+    
     _animationController = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 300),
@@ -321,13 +363,20 @@ class _BiliVideoPlayerWidgetState extends State<BiliVideoPlayerWidget>
 
   @override
   Widget build(BuildContext context) {
+    // 如果视频播放器未初始化，显示加载指示器
+    if (_videoAudioPlayer == null) {
+      return const Center(
+        child: CircularProgressIndicator(),
+      );
+    }
+
     Widget videoPlayer = Stack(
       children: [
         AspectRatio(
           aspectRatio: widget.controller.videoAspectRatio,
           child: Hero(
             tag: widget.heroTagId ?? 0,
-            child: _videoAudioPlayer,
+            child: _videoAudioPlayer!,
           ),
         ),
         if (widget.buildDanmaku != null) widget.buildDanmaku!(),

@@ -56,8 +56,14 @@ class BiliVideoController extends GetxController
         vsync: this,
         animationDuration: const Duration(milliseconds: 200));
     
-    // 先获取视频播放信息
-    videoPlayInfo = await VideoPlayApi.getVideoPlay(bvid: bvid, cid: cid);
+    try {
+      // 先获取视频播放信息
+      videoPlayInfo = await VideoPlayApi.getVideoPlay(bvid: bvid, cid: cid);
+    } catch (e) {
+      // 如果获取失败，使用默认值
+      videoPlayInfo = VideoPlayInfo.zero;
+      print("获取视频播放信息失败: $e");
+    }
     
     biliVideoPlayerController = BiliVideoPlayerController(
         videoPlayInfo: videoPlayInfo, // 添加必需的 videoPlayInfo 参数

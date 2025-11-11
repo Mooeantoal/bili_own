@@ -166,6 +166,9 @@ class _BiliVideoPlayerPanelState extends State<BiliVideoPlayerPanel> {
       if (widget.onToggleFullScreen != null) {
         widget.onToggleFullScreen!();
       }
+    } else if (widget.controller._toggleFullScreenCallback != null) {
+      // 如果找不到祖先widget，则使用回调方法
+      widget.controller._toggleFullScreenCallback!();
     }
   }
 
