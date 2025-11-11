@@ -363,45 +363,6 @@ class DownloadService extends GetxController implements DownloadCallback {
     }
   }
 
-  // 获取播放地址
-  Future<DownloadMediaFileInfo> _getPlayUrl(DownloadEntryInfo entry) async {
-    // 调用B站API获取真实的播放地址
-    final videoInfo = await VideoPlayApi.getVideoPlay(
-      bvid: entry.bvid ?? "",
-      cid: entry.pageData?.cid ?? entry.source?.cid ?? 0,
-    );
-    
-    // 转换为DownloadMediaFileInfo
-    if (videoInfo.videos.isNotEmpty) {
-      return Type2MediaFileInfo(
-        duration: videoInfo.timeLength,
-        video: videoInfo.videos.map((v) => Type2File(
-          id: v.quality.index,
-          baseUrl: v.urls.first,
-          backupUrl: v.urls.length > 1 ? v.urls.sublist(1) : null,
-          bandwidth: v.bandWidth,
-          codecid: 0, // 需要根据实际codecs解析
-          size: 0, // 需要从API获取
-          md5: "",
-          noRexcode: false,
-        )).toList(),
-        audio: videoInfo.audios.map((a) => Type2File(
-          id: a.quality.index,
-          baseUrl: a.urls.first,
-          backupUrl: a.urls.length > 1 ? a.urls.sublist(1) : null,
-          bandwidth: a.bandWidth,
-          codecid: 0, // 需要根据实际codecs解析
-          size: 0, // 需要从API获取
-          md5: "",
-          noRexcode: false,
-        )).toList(),
-      );
-    }
-    
-    // 返回空的媒体文件信息
-    return NoneMediaFileInfo("无法获取播放地址");
-  }
-
   // 完成下载
   void _completeDownload() {
     final current = curDownload.value;
@@ -491,11 +452,11 @@ class DownloadService extends GetxController implements DownloadCallback {
       return;
     }
 
-    if (_audioDownloadManager?.downloadInfo.status == CurrentDownloadInfo.STATUS_DOWNLOADING) {
+    if (_audioDownloadManager?.downloadInfo?.status == CurrentDownloadInfo.STATUS_DOWNLOADING) {
       curDownload.value = info.copyWith(
         status: CurrentDownloadInfo.STATUS_AUDIO_DOWNLOADING
       );
-    } else if (_audioDownloadManager?.downloadInfo.status == CurrentDownloadInfo.STATUS_FAIL_DOWNLOAD) {
+    } else if (_audioDownloadManager?.downloadInfo?.status == CurrentDownloadInfo.STATUS_FAIL_DOWNLOAD) {
       // 重新下载音频
       // TODO: 实现重新下载逻辑
     } else {
@@ -525,7 +486,7 @@ class _AudioDownloadCallback implements DownloadCallback {
 
   @override
   void onTaskComplete(CurrentDownloadInfo info) {
-    if (_parent._downloadManager?.downloadInfo.status == CurrentDownloadInfo.STATUS_COMPLETED) {
+    if (_parent._downloadManager?.downloadInfo?.status == CurrentDownloadInfo.STATUS_COMPLETED) {
       _parent._completeDownload();
     }
   }

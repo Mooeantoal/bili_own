@@ -3,14 +3,50 @@ import 'package:get/get.dart';
 import '../../common/utils/download_manager.dart';
 import '../../common/models/local/download/bili_download_entry_info.dart';
 import '../../common/models/local/download/bili_download_media_file_info.dart';
+import '../../common/models/local/download/current_download_info.dart';
+
+// 实现DownloadCallback接口
+class DownloadServiceCallback implements DownloadCallback {
+  final DownloadService _service;
+  
+  DownloadServiceCallback(this._service);
+  
+  @override
+  void onTaskRunning(CurrentDownloadInfo info) {
+    // 更新下载进度
+    _service._downloadProgress[info.entryInfo.taskId] = (info.progress / info.size).toDouble();
+    _service.update();
+  }
+  
+  @override
+  void onTaskComplete(CurrentDownloadInfo info) {
+    // 标记下载完成
+    _service._isDownloading[info.entryInfo.taskId] = false;
+    _service.update();
+  }
+  
+  @override
+  void onTaskError(CurrentDownloadInfo info, Object error) {
+    // 标记下载错误
+    _service._isDownloading[info.entryInfo.taskId] = false;
+    _service.update();
+  }
+}
 
 class DownloadService extends GetxController {
   static DownloadService get to => Get.find();
 
-  final DownloadManager _downloadManager = DownloadManager();
+  late final DownloadManager _downloadManager;
   final Map<String, double> _downloadProgress = {};
   final Map<String, bool> _isDownloading = {};
   final List<BiliDownloadEntryInfo> _downloadList = <BiliDownloadEntryInfo>[].obs;
+
+  @override
+  void onInit() {
+    super.onInit();
+    // 初始化DownloadManager并设置回调
+    _downloadManager = DownloadManager();
+  }
 
   // 下载列表
   List<BiliDownloadEntryInfo> get downloadList => _downloadList;
@@ -34,6 +70,16 @@ class DownloadService extends GetxController {
     _downloadList.add(entryInfo);
     _isDownloading[entryInfo.taskId] = true;
     update();
+
+    // 创建当前下载信息
+    final currentDownloadInfo = CurrentDownloadInfo(
+      entryInfo: entryInfo,
+      mediaFiles: mediaFiles,
+    );
+
+    // 设置DownloadManager参数
+    _downloadManager.downloadInfo = currentDownloadInfo;
+    _downloadManager.callback = DownloadServiceCallback(this);
 
     // 监听下载进度
     final progressStream = _downloadManager.getDownloadProgress(entryInfo.taskId);
