@@ -124,7 +124,16 @@ class VideoPlayApi {
           lastPlayTime: Duration(milliseconds: response.data!.lastPlayTime ?? 0));
     } catch (e) {
       print("获取视频播放信息失败: $e");
-      return VideoPlayInfo.zero;
+      // 返回一个默认的VideoPlayInfo而不是zero，确保不会导致播放器崩溃
+      return VideoPlayInfo(
+        supportVideoQualities: [],
+        supportAudioQualities: [],
+        timeLength: 0,
+        videos: [],
+        audios: [],
+        lastPlayCid: 0,
+        lastPlayTime: Duration.zero,
+      );
     }
   }
 

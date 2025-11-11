@@ -29,7 +29,9 @@ class _VideoAudioPlayerState extends State<VideoAudioPlayer> {
   void initState() {
     Future.microtask(() async {
       await widget.controller.init();
-      setState(() {});
+      if (mounted) {
+        setState(() {});
+      }
     });
     super.initState();
   }
@@ -194,7 +196,9 @@ class VideoAudioController {
       return;
     }
     //如果还没有播放器实例就创建
-    if (PlayersSingleton().count == 0) {
+    if (PlayersSingleton().count == 0 || 
+        PlayersSingleton().videoPlayer == null || 
+        PlayersSingleton().audioPlayer == null) {
       await PlayersSingleton().init();
     }
     //每初始化一次计数就加1
@@ -219,8 +223,15 @@ class VideoAudioController {
     var lastIsPlaying = state.isPlaying;
     PlayersSingleton().pauseSubscriptions();
     //播放器单例引用
-    var videoPlayer = PlayersSingleton().videoPlayer!;
-    var audioPlayer = PlayersSingleton().audioPlayer!;
+    var videoPlayer = PlayersSingleton().videoPlayer;
+    var audioPlayer = PlayersSingleton().audioPlayer;
+    
+    //检查播放器是否为空
+    if (videoPlayer == null || audioPlayer == null) {
+      log("videoPlayer or audioPlayer is null");
+      return;
+    }
+    
     //设置header
     {
       var name = 'http-header-fields';
@@ -408,26 +419,46 @@ class VideoAudioController {
       state.isEnd = false;
       state.isBuffering = false;
       log('seek');
-      await PlayersSingleton().audioPlayer?.pause();
-      await PlayersSingleton().videoPlayer?.pause();
+      if (PlayersSingleton().audioPlayer != null) {
+        await PlayersSingleton().audioPlayer!.pause();
+      }
+      if (PlayersSingleton().videoPlayer != null) {
+        await PlayersSingleton().videoPlayer!.pause();
+      }
       state.position = Duration.zero;
-      await PlayersSingleton().audioPlayer?.seek(Duration.zero);
-      await PlayersSingleton().videoPlayer?.seek(Duration.zero);
+      if (PlayersSingleton().audioPlayer != null) {
+        await PlayersSingleton().audioPlayer!.seek(Duration.zero);
+      }
+      if (PlayersSingleton().videoPlayer != null) {
+        await PlayersSingleton().videoPlayer!.seek(Duration.zero);
+      }
     }
-    await PlayersSingleton().audioPlayer?.play();
-    await PlayersSingleton().videoPlayer?.play();
+    if (PlayersSingleton().audioPlayer != null) {
+      await PlayersSingleton().audioPlayer!.play();
+    }
+    if (PlayersSingleton().videoPlayer != null) {
+      await PlayersSingleton().videoPlayer!.play();
+    }
   }
 
   Future<void> pause() async {
     state.isPlaying = false;
     if (state.isEnd) return;
-    await PlayersSingleton().audioPlayer?.pause();
-    await PlayersSingleton().videoPlayer?.pause();
+    if (PlayersSingleton().audioPlayer != null) {
+      await PlayersSingleton().audioPlayer!.pause();
+    }
+    if (PlayersSingleton().videoPlayer != null) {
+      await PlayersSingleton().videoPlayer!.pause();
+    }
   }
 
   Future<void> seekTo(Duration position) async {
-    await PlayersSingleton().audioPlayer?.seek(position);
-    await PlayersSingleton().videoPlayer?.seek(position);
+    if (PlayersSingleton().audioPlayer != null) {
+      await PlayersSingleton().audioPlayer!.seek(position);
+    }
+    if (PlayersSingleton().videoPlayer != null) {
+      await PlayersSingleton().videoPlayer!.seek(position);
+    }
     state.position = position;
     for (var element in _seekToListeners) {
       element(position);
@@ -436,12 +467,15 @@ class VideoAudioController {
 
   Future<void> setPlayBackSpeed(double speed) async {
     state.speed = speed;
-    await PlayersSingleton().audioPlayer?.setRate(speed);
-    await PlayersSingleton().videoPlayer?.setRate(speed);
+    if (PlayersSingleton().audioPlayer != null) {
+      await PlayersSingleton().audioPlayer!.setRate(speed);
+    }
+    if (PlayersSingleton().videoPlayer != null) {
+      await PlayersSingleton().videoPlayer!.setRate(speed);
+    }
   }
 
   Future<void> dispose() async {
-    // if (PlayersSingleton().count == 0) {
     // state.isPlaying = false;
     await pause();
     // await PlayersSingleton().audioPlayer?.pause();
@@ -449,6 +483,9 @@ class VideoAudioController {
     //   await PlayersSingleton().dispose();
     // } else {
     PlayersSingleton().count--;
+    if (PlayersSingleton().count <= 0) {
+      await PlayersSingleton().dispose();
+    }
     // }
   }
 
