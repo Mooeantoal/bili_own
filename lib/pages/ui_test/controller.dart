@@ -25,7 +25,6 @@ class UiTestController extends GetxController {
   List<ListTile> listTiles = [];
   bp.BiliVideoPlayerController biliVideoPlayerController =
       bp.BiliVideoPlayerController(
-          videoPlayInfo: VideoPlayInfo.zero,
           bvid: BvidAvidUtil.av2Bvid(170001), 
           cid: 279786);
 
@@ -136,10 +135,9 @@ class UiTestController extends GetxController {
       '密码登陆': const PasswordLoginPage(),
       '短信登陆': const PhoneLoginPage(),
       '视频播放测试': Builder(
-        builder: (context) => bp.BiliVideoPlayer(
-          videoPlayInfo: VideoPlayInfo.zero,
-          bvid: '',
-          cid: 0,
+        builder: (context) => bp.BiliVideoPlayerWidget(
+          bp.BiliVideoPlayerController(bvid: '', cid: 0),
+          heroTagId: 0,
         ),
       ),
     };

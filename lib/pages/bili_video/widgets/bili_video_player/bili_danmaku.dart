@@ -94,7 +94,7 @@ class _BiliDanmakuState extends State<BiliDanmaku> {
   Future<void> _requestDanmaku() async {
     widget.controller.dmSegList.clear();
     widget.controller.segmentCount =
-        (widget.controller.biliVideoPlayerController.videoPlayInfo.timeLength /
+        ((widget.controller.biliVideoPlayerController.videoPlayInfo?.timeLength ?? 0) /
                 (60 * 6))
             .ceil();
     for (int segmentIndex = 1;

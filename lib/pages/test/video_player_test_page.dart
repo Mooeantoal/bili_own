@@ -66,10 +66,12 @@ class _VideoPlayerTestContentState extends State<VideoPlayerTestContent> {
 
     // 初始化播放器控制器，使用测试视频
     _controller = BiliVideoPlayerController(
-      videoPlayInfo: testVideoPlayInfo,
       bvid: BvidAvidUtil.av2Bvid(170001), // 测试视频BV号
       cid: 279786, // 测试视频CID
     );
+    
+    // 设置videoPlayInfo属性
+    _controller.videoPlayInfo = testVideoPlayInfo;
   }
 
   @override
@@ -88,7 +90,7 @@ class _VideoPlayerTestContentState extends State<VideoPlayerTestContent> {
           heroTagId: 999,
           buildControllPanel: () {
             return BiliVideoPlayerPanel(
-              controller: BiliVideoPlayerPanelController(_controller),
+              BiliVideoPlayerPanelController(_controller),
             );
           },
         ),
