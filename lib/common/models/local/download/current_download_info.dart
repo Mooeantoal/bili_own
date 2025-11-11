@@ -81,4 +81,35 @@ class CurrentDownloadInfo {
       header: json['header'] as Map<String, String>?,
     );
   }
+
+  // 添加copyWith方法
+  CurrentDownloadInfo copyWith({
+    int? taskId,
+    String? parentDirPath,
+    String? parentId,
+    int? id,
+    String? name,
+    String? url,
+    int? length,
+    int? size,
+    int? progress,
+    int? status,
+    Map<String, String>? header,
+  }) {
+    return CurrentDownloadInfo(
+      entryInfo: entryInfo,
+      mediaFiles: mediaFiles,
+      taskId: taskId ?? this.taskId,
+      parentDirPath: parentDirPath ?? this.parentDirPath,
+      parentId: parentId ?? this.parentId,
+      id: id ?? this.id,
+      name: name ?? this.name,
+      url: url ?? this.url,
+      length: length ?? this.length,
+      size: size ?? this.size,
+      progress: progress ?? this.progress,
+      status: status ?? this.status,
+      header: header ?? this.header,
+    );
+  }
 }

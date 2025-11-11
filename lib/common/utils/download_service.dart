@@ -365,33 +365,41 @@ class DownloadService extends GetxController implements DownloadCallback {
 
   // 获取播放地址
   Future<DownloadMediaFileInfo> _getPlayUrl(DownloadEntryInfo entry) async {
-    // 简化实现，实际应调用B站API获取播放地址
-    // 这里返回一个示例Type2MediaFileInfo
-    return Type2MediaFileInfo(
-      duration: 0,
-      video: [
-        Type2File(
-          id: 0,
-          baseUrl: "https://example.com/video.m4s",
-          bandwidth: 0,
-          codecid: 0,
-          size: 0,
-          md5: "",
-          noRexcode: false,
-        )
-      ],
-      audio: [
-        Type2File(
-          id: 0,
-          baseUrl: "https://example.com/audio.m4s",
-          bandwidth: 0,
-          codecid: 0,
-          size: 0,
-          md5: "",
-          noRexcode: false,
-        )
-      ],
+    // 调用B站API获取真实的播放地址
+    final videoInfo = await VideoPlayApi.getVideoPlay(
+      bvid: entry.bvid ?? "",
+      cid: entry.pageData?.cid ?? entry.source?.cid ?? 0,
     );
+    
+    // 转换为DownloadMediaFileInfo
+    if (videoInfo.videos.isNotEmpty) {
+      return Type2MediaFileInfo(
+        duration: videoInfo.timeLength,
+        video: videoInfo.videos.map((v) => Type2File(
+          id: v.quality.index,
+          baseUrl: v.urls.first,
+          backupUrl: v.urls.length > 1 ? v.urls.sublist(1) : null,
+          bandwidth: v.bandWidth,
+          codecid: 0, // 需要根据实际codecs解析
+          size: 0, // 需要从API获取
+          md5: "",
+          noRexcode: false,
+        )).toList(),
+        audio: videoInfo.audios.map((a) => Type2File(
+          id: a.quality.index,
+          baseUrl: a.urls.first,
+          backupUrl: a.urls.length > 1 ? a.urls.sublist(1) : null,
+          bandwidth: a.bandWidth,
+          codecid: 0, // 需要根据实际codecs解析
+          size: 0, // 需要从API获取
+          md5: "",
+          noRexcode: false,
+        )).toList(),
+      );
+    }
+    
+    // 返回空的媒体文件信息
+    return NoneMediaFileInfo("无法获取播放地址");
   }
 
   // 完成下载
@@ -528,35 +536,41 @@ class _AudioDownloadCallback implements DownloadCallback {
   }
 }
 
-// 扩展CurrentDownloadInfo以支持copyWith方法
-extension CurrentDownloadInfoCopyWith on CurrentDownloadInfo {
-  CurrentDownloadInfo copyWith({
-    int? taskId,
-    String? parentDirPath,
-    String? parentId,
-    int? id,
-    String? name,
-    String? url,
-    int? length,
-    int? size,
-    int? progress,
-    int? status,
-    Map<String, String>? header,
-  }) {
-    return CurrentDownloadInfo(
-      entryInfo: this.entryInfo,
-      mediaFiles: this.mediaFiles,
-      taskId: taskId ?? this.taskId,
-      parentDirPath: parentDirPath ?? this.parentDirPath,
-      parentId: parentId ?? this.parentId,
-      id: id ?? this.id,
-      name: name ?? this.name,
-      url: url ?? this.url,
-      length: length ?? this.length,
-      size: size ?? this.size,
-      progress: progress ?? this.progress,
-      status: status ?? this.status,
-      header: header ?? this.header,
+// 获取播放地址
+  Future<DownloadMediaFileInfo> _getPlayUrl(DownloadEntryInfo entry) async {
+    // 调用B站API获取真实的播放地址
+    final videoInfo = await VideoPlayApi.getVideoPlay(
+      bvid: entry.bvid ?? "",
+      cid: entry.pageData?.cid ?? entry.source?.cid ?? 0,
     );
+    
+    // 转换为DownloadMediaFileInfo
+    if (videoInfo.videos.isNotEmpty) {
+      return Type2MediaFileInfo(
+        duration: videoInfo.timeLength,
+        video: videoInfo.videos.map((v) => Type2File(
+          id: v.quality.index,
+          baseUrl: v.urls.first,
+          backupUrl: v.urls.length > 1 ? v.urls.sublist(1) : null,
+          bandwidth: v.bandWidth,
+          codecid: 0, // 需要根据实际codecs解析
+          size: 0, // 需要从API获取
+          md5: "",
+          noRexcode: false,
+        )).toList(),
+        audio: videoInfo.audios.map((a) => Type2File(
+          id: a.quality.index,
+          baseUrl: a.urls.first,
+          backupUrl: a.urls.length > 1 ? a.urls.sublist(1) : null,
+          bandwidth: a.bandWidth,
+          codecid: 0, // 需要根据实际codecs解析
+          size: 0, // 需要从API获取
+          md5: "",
+          noRexcode: false,
+        )).toList(),
+      );
+    }
+    
+    // 返回空的媒体文件信息
+    return NoneMediaFileInfo("无法获取播放地址");
   }
-}

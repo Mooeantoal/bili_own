@@ -15,17 +15,12 @@ abstract class DownloadCallback {
 }
 
 class DownloadManager {
-  static final DownloadManager _instance = DownloadManager._internal();
-  factory DownloadManager() => _instance;
-  DownloadManager._internal();
-
-  final Dio _dio = Dio();
-  final Map<String, StreamController<double>> _progressControllers = {};
-  final Map<String, CancelToken> _cancelTokens = {};
-  
   // 添加downloadInfo字段
   late CurrentDownloadInfo downloadInfo;
   late DownloadCallback callback;
+  final Dio _dio = Dio();
+  final Map<String, StreamController<double>> _progressControllers = {};
+  final Map<String, CancelToken> _cancelTokens = {};
 
   // 添加构造函数
   DownloadManager.withParams({
@@ -35,10 +30,81 @@ class DownloadManager {
 
   // 添加start方法
   void start(File file) {
-    // 实现下载逻辑
-    // 这里简化处理，实际应该根据downloadInfo.url进行下载
-    // 并在下载过程中调用callback.onTaskRunning和callback.onTaskComplete
-    callback.onTaskComplete(downloadInfo);
+    // 启动下载任务
+    _downloadFile(file);
+  }
+
+  // 下载文件
+  Future<void> _downloadFile(File file) async {
+    try {
+      // 设置下载状态
+      downloadInfo = downloadInfo.copyWith(status: CurrentDownloadInfo.STATUS_DOWNLOADING);
+      callback.onTaskRunning(downloadInfo);
+
+      // 创建Dio实例并配置
+      final dio = Dio();
+      dio.options.connectTimeout = Duration(seconds: 120);
+      dio.options.receiveTimeout = Duration(seconds: 120);
+
+      // 设置请求头
+      if (downloadInfo.header != null) {
+        dio.options.headers.addAll(downloadInfo.header!);
+      }
+
+      // 检查文件是否已存在
+      var downloadLength = 0;
+      if (file.existsSync()) {
+        if (downloadInfo.size == 0) {
+          file.deleteSync();
+        } else {
+          downloadLength = file.lengthSync();
+          downloadInfo = downloadInfo.copyWith(progress: downloadLength);
+        }
+      }
+
+      // 设置Range请求头以支持断点续传
+      if (downloadLength > 0 && downloadInfo.size != 0) {
+        if (downloadInfo.size == downloadLength) {
+          // 文件已下载完成
+          downloadInfo = downloadInfo.copyWith(status: CurrentDownloadInfo.STATUS_COMPLETED);
+          callback.onTaskComplete(downloadInfo);
+          return;
+        }
+        dio.options.headers['Range'] = 'bytes=$downloadLength-${downloadInfo.size}';
+      }
+
+      // 创建取消令牌
+      final cancelToken = CancelToken();
+
+      // 执行下载
+      await dio.download(
+        downloadInfo.url,
+        file.path,
+        cancelToken: cancelToken,
+        onReceiveProgress: (received, total) {
+          if (total != -1) {
+            // 更新下载进度
+            final progress = downloadLength + received;
+            downloadInfo = downloadInfo.copyWith(
+              progress: progress,
+              size: downloadInfo.size == 0 ? total : downloadInfo.size,
+            );
+            callback.onTaskRunning(downloadInfo);
+          }
+        },
+      );
+
+      // 下载完成
+      downloadInfo = downloadInfo.copyWith(
+        status: CurrentDownloadInfo.STATUS_COMPLETED,
+        progress: file.lengthSync(),
+      );
+      callback.onTaskComplete(downloadInfo);
+    } catch (e) {
+      // 下载出错
+      downloadInfo = downloadInfo.copyWith(status: CurrentDownloadInfo.STATUS_FAIL_DOWNLOAD);
+      callback.onTaskError(downloadInfo, e);
+    }
   }
 
   // 下载视频
