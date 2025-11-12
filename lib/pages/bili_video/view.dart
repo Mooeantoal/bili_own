@@ -59,8 +59,9 @@ class _BiliVideoPageState extends State<BiliVideoPage> with RouteAware {
   void didPopNext() async {
     super.didPopNext();
     //回到当前页面时
-    //刷新页面
-    await controller.biliVideoPlayerController.refreshPlayer();
+    //刷新页面 - 重新加载视频信息
+    await controller.biliVideoPlayerController.loadVideoInfo(
+        controller.bvid, controller.cid);
   }
 
   @override
@@ -161,17 +162,8 @@ class _BiliVideoPageState extends State<BiliVideoPage> with RouteAware {
           body: Column(
             children: [
               BiliVideoPlayerWidget(
-                controller.biliVideoPlayerController,
-                heroTagId: HeroTagId.lastId,
-                buildControllPanel: () {
-                  return BiliVideoPlayerPanel(
-                    controller.biliVideoPlayerPanelController,
-                  );
-                },
-                buildDanmaku: () {
-                  return BiliDanmaku(
-                      controller: controller.biliDanmakuController);
-                },
+                bvid: controller.bvid,
+                cid: controller.cid,
               ),
               Expanded(child: _buildView(context, controller)),
             ],

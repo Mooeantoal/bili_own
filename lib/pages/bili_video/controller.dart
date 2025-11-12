@@ -29,9 +29,8 @@ class BiliVideoController extends GetxController
   Future<void> changeVideoPart(String bvid, int cid) async {
     this.cid = cid;
     this.bvid = bvid;
-    biliVideoPlayerController.bvid = bvid;
-    biliVideoPlayerController.cid = cid;
-    await biliVideoPlayerController.changeCid(bvid, cid);
+    // 重新加载视频信息而不是直接设置属性
+    await biliVideoPlayerController.loadVideoInfo(bvid, cid);
   }
 
   refreshReply() {
@@ -48,11 +47,8 @@ class BiliVideoController extends GetxController
         length: 2,
         vsync: this,
         animationDuration: const Duration(milliseconds: 200));
-    biliVideoPlayerController = BiliVideoPlayerController(
-        bvid: bvid,
-        cid: cid,
-        initVideoPosition:
-            progress != null ? Duration(seconds: progress!) : Duration.zero);
+    // 使用正确的构造函数
+    biliVideoPlayerController = BiliVideoPlayerController(true);
     biliVideoPlayerPanelController =
         BiliVideoPlayerPanelController(biliVideoPlayerController);
     biliDanmakuController = BiliDanmakuController(biliVideoPlayerController);
@@ -61,7 +57,7 @@ class BiliVideoController extends GetxController
 
   @override
   void onClose() async {
-    await biliVideoPlayerController.dispose();
+    biliVideoPlayerController.dispose();
     super.onClose();
   }
 }

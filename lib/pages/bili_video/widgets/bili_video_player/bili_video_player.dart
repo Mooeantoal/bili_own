@@ -68,6 +68,10 @@ class BiliVideoPlayerController {
   VideoPlayItem? _videoPlayItem;
   AudioPlayItem? _audioPlayItem;
   final VideoAudioController _videoAudioController;
+  
+  // 添加bvid和cid属性
+  String? bvid;
+  int? cid;
 
   BiliVideoPlayerController(bool autoPlay)
       : _videoAudioController = VideoAudioController(
@@ -77,13 +81,24 @@ class BiliVideoPlayerController {
 
   String get videoUrl => _videoPlayItem?.urls.first ?? '';
   String get audioUrl => _audioPlayItem?.urls.first ?? '';
+  
+  // 添加获取position的getter
+  Duration get position => _videoAudioController.state.position;
+  
+  // 添加获取speed的getter
+  double get speed => _videoAudioController.state.speed;
 
   Future<void> initPlayer(BuildContext context, String bvid, int cid) async {
     // 初始化播放器逻辑
+    this.bvid = bvid;
+    this.cid = cid;
   }
 
   Future<bool> loadVideoInfo(String bvid, int cid) async {
     log("加载视频信息: bvid=$bvid, cid=$cid");
+    this.bvid = bvid;
+    this.cid = cid;
+    
     if (videoPlayInfo == null) {
       try {
         //加载视频播放信息
@@ -155,7 +170,57 @@ class BiliVideoPlayerController {
     return true;
   }
 
+  // 添加pause方法
+  Future<void> pause() async {
+    await _videoAudioController.pause();
+  }
+  
+  // 添加play方法
+  Future<void> play() async {
+    await _videoAudioController.play();
+  }
+  
+  // 添加seekTo方法
+  Future<void> seekTo(Duration position) async {
+    await _videoAudioController.seekTo(position);
+  }
+  
+  // 添加setPlaybackSpeed方法
+  Future<void> setPlaybackSpeed(double speed) async {
+    await _videoAudioController.setPlayBackSpeed(speed);
+  }
+
   void dispose() {
     _videoAudioController.dispose();
+  }
+  
+  // 添加addListener方法
+  void addListener(VoidCallback listener) {
+    _videoAudioController.addListener(listener);
+  }
+  
+  // 添加removeListener方法
+  void removeListener(VoidCallback listener) {
+    _videoAudioController.removeListener(listener);
+  }
+  
+  // 添加addStateChangedListener方法
+  void addStateChangedListener(Function(VideoAudioState) listener) {
+    _videoAudioController.addStateChangedListener(listener);
+  }
+  
+  // 添加removeStateChangedListener方法
+  void removeStateChangedListener(Function(VideoAudioState) listener) {
+    _videoAudioController.removeStateChangedListener(listener);
+  }
+  
+  // 添加addSeekToListener方法
+  void addSeekToListener(Function(Duration) listener) {
+    _videoAudioController.addSeekToListener(listener);
+  }
+  
+  // 添加removeSeekToListener方法
+  void removeSeekToListener(Function(Duration) listener) {
+    _videoAudioController.removeSeekToListener(listener);
   }
 }
