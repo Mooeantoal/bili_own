@@ -1,7 +1,7 @@
 import 'package:bili_own/common/utils/bili_own_storage.dart';
 import 'package:bili_own/common/utils/http_utils.dart';
 import 'package:bili_own/common/utils/settings.dart';
-import 'package:bili_own/common/utils/simple_download_service.dart';
+import 'package:bili_own/common/utils/download_service.dart';
 import 'package:bili_own/pages/main/index.dart';
 import 'package:dynamic_color/dynamic_color.dart';
 import 'package:flutter/material.dart';
@@ -32,8 +32,8 @@ class MyApp extends StatelessWidget {
       return GetMaterialApp(
           onInit: () async {
             await HttpUtils().init();
-            // 初始化简化版下载服务
-            Get.put(SimpleDownloadService());
+            // 初始化下载服务
+            Get.put(DownloadService());
           },
           useInheritedMediaQuery: true,
           themeMode: SettingsUtil.currentThemeMode,

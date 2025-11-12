@@ -4,6 +4,8 @@ import '../home/view.dart';
 import '../dynamic/view.dart';
 import '../user_menu/user_menu_page.dart';
 import '../search/view.dart';
+// 导入下载页面
+import '../download/download_page.dart';
 
 class MainController extends GetxController {
   MainController();
@@ -13,7 +15,7 @@ class MainController extends GetxController {
     const HomePage(),
     const DynamicPage(),
     const SearchPage(),
-    const Center(child: Text("下载页面")), // 恢复为简单的文本显示
+    DownloadPage(), // 使用我们新创建的下载页面
     const UserMenuStandalonePage(),
   ];
 

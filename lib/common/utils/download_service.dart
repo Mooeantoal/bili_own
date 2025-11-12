@@ -8,6 +8,7 @@ import 'package:bili_own/common/models/local/download/download_entry_info.dart';
 import 'package:bili_own/common/models/local/download/download_media_file_info.dart';
 import 'package:bili_own/common/models/local/download/current_download_info.dart';
 import 'package:bili_own/common/models/local/download/bili_download_entry_info.dart';
+import 'package:bili_own/common/models/local/download/bili_download_media_file_info.dart';
 import 'package:bili_own/common/api/video_play_api.dart';
 import 'package:bili_own/common/utils/bili_own_storage.dart';
 import 'package:bili_own/common/utils/permission_utils.dart';
@@ -30,14 +31,14 @@ class DownloadEntryAndPathInfo {
 class DownloadService extends GetxController implements DownloadCallback {
   static DownloadService get instance => Get.find<DownloadService>();
 
-  final List<DownloadEntryAndPathInfo> downloadList = <DownloadEntryAndPathInfo>[];
-  final List<DownloadEntryAndPathInfo> waitDownloadQueue = <DownloadEntryAndPathInfo>[];
+  final List<DownloadEntryAndPathInfo> downloadList = <DownloadEntryAndPathInfo>[].obs;
+  final List<DownloadEntryAndPathInfo> waitDownloadQueue = <DownloadEntryAndPathInfo>[].obs;
   final Rx<CurrentDownloadInfo?> curDownload = Rx<CurrentDownloadInfo?>(null);
+  final Map<String, double> downloadProgress = <String, double>{}.obs;
   DownloadManager? _downloadManager;
-  DownloadManager? _audioDownloadManager;
   int _currentTaskId = 1;
   int _idCounter = 1;
-  bool _isPaused = false; // 添加暂停状态标志
+  bool _isPaused = false;
 
   @override
   void onInit() {
@@ -127,9 +128,8 @@ class DownloadService extends GetxController implements DownloadCallback {
 
   // 获取下载路径
   Future<String> _getDownloadPath() async {
-    // 使用应用私有目录
-    final directory = await getApplicationDocumentsDirectory();
-    return path.join(directory.path, "downloads");
+    // 使用指定的Android下载目录
+    return "/storage/emulated/0/Download/Biliown";
   }
 
   // 获取下载文件目录
@@ -142,49 +142,87 @@ class DownloadService extends GetxController implements DownloadCallback {
     return entryDir;
   }
 
+  // 创建下载任务
+  void createDownloadTask(BiliDownloadEntryInfo entryInfo, List<BiliDownloadMediaFileInfo> mediaFiles) async {
+    // 检查并请求存储权限
+    final hasPermission = await PermissionUtils.requestStoragePermission();
+    if (!hasPermission) {
+      print("存储权限被拒绝，无法创建下载任务");
+      Get.rawSnackbar(title: "权限错误", message: "需要存储权限才能下载视频");
+      return;
+    }
+    
+    // 创建下载管理器
+    _downloadManager = DownloadManager();
+    _downloadManager!.callback = this;
+    
+    try {
+      // 开始下载
+      await _downloadManager!.downloadVideo(entryInfo, mediaFiles);
+    } catch (e) {
+      print("下载失败: $e");
+      Get.rawSnackbar(title: "下载错误", message: "下载失败: $e");
+    }
+  }
+
   @override
   void onTaskRunning(CurrentDownloadInfo info) {
     // 更新当前下载信息
     curDownload.value = info;
+    // 更新进度
+    if (info.size > 0) {
+      downloadProgress[info.entryInfo.taskId] = info.progress / info.size;
+    }
+    update();
   }
 
   @override
   void onTaskComplete(CurrentDownloadInfo info) {
     // 下载完成，清空当前下载信息
     curDownload.value = null;
+    downloadProgress[info.entryInfo.taskId] = 1.0;
+    update();
+    
+    // 显示下载完成提示
+    Get.rawSnackbar(title: "下载完成", message: "视频下载完成: ${info.entryInfo.title}");
   }
 
   @override
   void onTaskError(CurrentDownloadInfo info, Object error) {
     // 下载出错，清空当前下载信息
     curDownload.value = null;
+    update();
+    
+    // 显示错误提示
+    Get.rawSnackbar(title: "下载错误", message: "下载失败: $error");
   }
 
   // 暂停下载
-  void pauseDownload() {
+  void pauseDownload(String taskId) {
     _isPaused = true;
     if (_downloadManager != null) {
-      _downloadManager!.pauseDownload(_currentTaskId.toString());
-    }
-    if (_audioDownloadManager != null) {
-      _audioDownloadManager!.pauseDownload(_currentTaskId.toString());
+      _downloadManager!.pauseDownload(taskId);
     }
   }
 
   // 恢复下载
-  void resumeDownload() {
+  void resumeDownload(String taskId) {
     _isPaused = false;
     // 实际恢复下载的逻辑需要根据具体实现来处理
   }
 
   // 取消下载
-  void cancelDownload() {
+  void cancelDownload(String taskId) {
     if (_downloadManager != null) {
-      _downloadManager!.cancelDownload(_currentTaskId.toString());
-    }
-    if (_audioDownloadManager != null) {
-      _audioDownloadManager!.cancelDownload(_currentTaskId.toString());
+      _downloadManager!.cancelDownload(taskId);
     }
     curDownload.value = null;
+    downloadProgress.remove(taskId);
+    update();
+  }
+  
+  // 获取下载进度
+  double getDownloadProgress(String taskId) {
+    return downloadProgress[taskId] ?? 0.0;
   }
 }
