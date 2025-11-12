@@ -6,7 +6,6 @@ import 'package:bili_own/pages/home/index.dart';
 import 'package:bili_own/pages/recommend/controller.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:bili_own/pages/download/test_download_page.dart'; // 添加测试页面导入
 
 import '../dynamic/controller.dart';
 import 'index.dart';
@@ -101,13 +100,6 @@ class _MainPageState extends State<MainPage> {
             ],
             selectedIndex: controller.selectedIndex.value,
             onDestinationSelected: (value) => onDestinationSelected(value),
-          ),
-          // 添加浮动测试按钮
-          floatingActionButton: FloatingActionButton(
-            onPressed: () {
-              Get.to(() => const TestDownloadPage());
-            },
-            child: const Icon(Icons.speed),
           ),
         ));
   }

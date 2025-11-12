@@ -125,524 +125,66 @@ class DownloadService extends GetxController implements DownloadCallback {
     return list;
   }
 
-  // 创建下载任务
-  void createDownload(DownloadEntryInfo entry) async {
-    // 检查并请求存储权限
-    final hasPermission = await PermissionUtils.requestStoragePermission();
-    if (!hasPermission) {
-      print("存储权限被拒绝，无法创建下载任务");
-      Get.rawSnackbar(title: "权限错误", message: "需要存储权限才能下载视频");
-      return;
+  // 获取下载路径
+  Future<String> _getDownloadPath() async {
+    // 使用应用私有目录
+    final directory = await getApplicationDocumentsDirectory();
+    return path.join(directory.path, "downloads");
+  }
+
+  // 获取下载文件目录
+  Future<Directory> _getDownloadFileDir(DownloadEntryInfo entry) async {
+    final downloadPath = await _getDownloadPath();
+    final entryDir = Directory(path.join(downloadPath, entry.avid?.toString() ?? "unknown"));
+    if (!entryDir.existsSync()) {
+      entryDir.createSync(recursive: true);
     }
-    
-    final entryDir = await _getDownloadFileDir(entry);
-    
-    // 保存视频信息
-    final entryJsonFile = File(path.join(entryDir.path, "entry.json"));
-    // 简化处理，实际应将entry对象转换为JSON
-    final entryMap = {
-      'media_type': entry.mediaType,
-      'has_dash_audio': entry.hasDashAudio,
-      'is_completed': entry.isCompleted,
-      'total_bytes': entry.totalBytes,
-      'downloaded_bytes': entry.downloadedBytes,
-      'title': entry.title,
-      'type_tag': entry.typeTag,
-      'cover': entry.cover,
-      'prefered_video_quality': entry.preferedVideoQuality,
-      'quality_pithy_description': entry.qualityPithyDescription,
-      'guessed_total_bytes': entry.guessedTotalBytes,
-      'total_time_milli': entry.totalTimeMilli,
-      'danmaku_count': entry.danmakuCount,
-      'time_update_stamp': entry.timeUpdateStamp,
-      'time_create_stamp': entry.timeCreateStamp,
-      'can_play_in_advance': entry.canPlayInAdvance,
-      'interrupt_transform_temp_file': entry.interruptTransformTempFile,
-      'avid': entry.avid,
-      'spid': entry.spid,
-      'bvid': entry.bvid,
-      'owner_id': entry.ownerId,
-    };
-    
-    entryJsonFile.writeAsStringSync(json.encode(entryMap));
-    
-    final biliDownInfo = DownloadEntryAndPathInfo(
-      entryDirPath: entryDir.path,
-      pageDirPath: entryDir.parent.path,
-      entry: entry,
-    );
-    
-    downloadList.insert(0, biliDownInfo);
-    
-    if (curDownload.value == null) {
-      startDownload(biliDownInfo);
-    } else {
-      waitDownloadQueue.add(biliDownInfo);
+    return entryDir;
+  }
+
+  @override
+  void onTaskRunning(CurrentDownloadInfo info) {
+    // 更新当前下载信息
+    curDownload.value = info;
+  }
+
+  @override
+  void onTaskComplete(CurrentDownloadInfo info) {
+    // 下载完成，清空当前下载信息
+    curDownload.value = null;
+  }
+
+  @override
+  void onTaskError(CurrentDownloadInfo info, Object error) {
+    // 下载出错，清空当前下载信息
+    curDownload.value = null;
+  }
+
+  // 暂停下载
+  void pauseDownload() {
+    _isPaused = true;
+    if (_downloadManager != null) {
+      _downloadManager!.pauseDownload(_currentTaskId.toString());
+    }
+    if (_audioDownloadManager != null) {
+      _audioDownloadManager!.pauseDownload(_currentTaskId.toString());
     }
   }
 
-  // 开始下载
-  void startDownload(DownloadEntryAndPathInfo biliDownInfo) async {
-    // 检查并请求存储权限
-    final hasPermission = await PermissionUtils.requestStoragePermission();
-    if (!hasPermission) {
-      print("存储权限被拒绝，无法开始下载");
-      Get.rawSnackbar(title: "权限错误", message: "需要存储权限才能下载视频");
-      return;
-    }
-    
-    // 取消当前任务
+  // 恢复下载
+  void resumeDownload() {
+    _isPaused = false;
+    // 实际恢复下载的逻辑需要根据具体实现来处理
+  }
+
+  // 取消下载
+  void cancelDownload() {
     if (_downloadManager != null) {
       _downloadManager!.cancelDownload(_currentTaskId.toString());
     }
     if (_audioDownloadManager != null) {
       _audioDownloadManager!.cancelDownload(_currentTaskId.toString());
     }
-    _downloadManager = null;
-    _audioDownloadManager = null;
-
-    // 开始任务/继续任务
-    final entryDir = Directory(biliDownInfo.entryDirPath);
-    final danmakuXMLFile = File(path.join(entryDir.path, "danmaku.xml"));
-    final entry = biliDownInfo.entry;
-    final parentId = entry.seasonId ?? entry.avid?.toString() ?? "";
-    final id = entry.source?.cid ?? entry.pageData?.cid ?? 0;
-    _currentTaskId = _idCounter++;
-
-    // 创建BiliDownloadEntryInfo对象
-    final biliEntryInfo = BiliDownloadEntryInfo(
-      title: entry.title,
-      cover: entry.cover ?? "",
-      preferedVideoQuality: entry.preferedVideoQuality ?? 0,
-      durlBackupUrl: "",
-      totalBytes: entry.totalBytes,
-      downloadedBytes: entry.downloadedBytes,
-      filePath: entryDir.path,
-      taskId: _currentTaskId.toString(),
-      type: "video",
-      state: 0,
-      errorMsg: "",
-      createTime: DateTime.now().millisecondsSinceEpoch,
-      finishTime: 0,
-      aid: entry.avid?.toString() ?? "",
-      cid: entry.pageData?.cid?.toString() ?? "",
-      bvid: entry.bvid ?? "",
-      seasonId: entry.seasonId ?? "",
-      episodeId: entry.ep?.episodeId?.toString() ?? "",
-      upName: "",
-      upMid: "",
-    );
-
-    // 创建CurrentDownloadInfo对象
-    final currentDownloadInfo = CurrentDownloadInfo(
-      entryInfo: biliEntryInfo,
-      mediaFiles: [],
-    );
-
-    // 检查弹幕文件是否存在
-    if (!danmakuXMLFile.existsSync()) {
-      try {
-        // 获取弹幕并下载
-        curDownload.value = currentDownloadInfo.copyWith(
-          status: CurrentDownloadInfo.STATUS_GET_DANMAKU,
-        );
-        
-        // TODO: 实现弹幕下载逻辑
-        // 这里需要调用B站API获取弹幕XML并保存
-      } catch (e) {
-        curDownload.value = currentDownloadInfo.copyWith(
-          status: CurrentDownloadInfo.STATUS_FAIL_DANMAKU,
-        );
-        print("获取弹幕失败: $e");
-        return;
-      }
-    }
-
-    _downloadVideo(currentDownloadInfo, biliDownInfo);
-  }
-
-  // 下载视频
-  void _downloadVideo(CurrentDownloadInfo currentDownloadInfo, DownloadEntryAndPathInfo biliDownInfo) async {
-    if (currentDownloadInfo.taskId != _currentTaskId) {
-      return;
-    }
-
-    final entry = biliDownInfo.entry;
-    final entryDir = Directory(biliDownInfo.entryDirPath);
-    final videoDir = Directory(path.join(entryDir.path, entry.videoDirName));
-    final parentId = entry.seasonId ?? entry.avid?.toString() ?? "";
-    final id = entry.source?.cid ?? entry.pageData?.cid ?? 0;
-    
-    if (!videoDir.existsSync()) {
-      videoDir.createSync(recursive: true);
-    }
-
-    try {
-      curDownload.value = currentDownloadInfo.copyWith(
-        status: CurrentDownloadInfo.STATUS_GET_PLAYURL,
-      );
-
-      // 获取播放地址并下载
-      final mediaFileInfo = await _getPlayUrl(entry);
-      final httpHeader = mediaFileInfo.httpHeader();
-      final mediaJsonFile = File(path.join(videoDir.path, "index.json"));
-      mediaJsonFile.writeAsStringSync(json.encode({})); // 简化处理
-
-      if (currentDownloadInfo.taskId != _currentTaskId) {
-        return;
-      }
-
-      if (mediaFileInfo is Type2MediaFileInfo) {
-        _downloadManager = DownloadManager.withParams(
-          downloadInfo: CurrentDownloadInfo(
-            entryInfo: BiliDownloadEntryInfo(
-              title: entry.title,
-              cover: entry.cover ?? "",
-              preferedVideoQuality: entry.preferedVideoQuality ?? 0,
-              durlBackupUrl: "",
-              totalBytes: entry.totalBytes,
-              downloadedBytes: entry.downloadedBytes,
-              filePath: entryDir.path,
-              taskId: _currentTaskId.toString(),
-              type: "video",
-              state: 0,
-              errorMsg: "",
-              createTime: DateTime.now().millisecondsSinceEpoch,
-              finishTime: 0,
-              aid: entry.avid?.toString() ?? "",
-              cid: entry.pageData?.cid?.toString() ?? "",
-              bvid: entry.bvid ?? "",
-              seasonId: entry.seasonId ?? "",
-              episodeId: entry.ep?.episodeId?.toString() ?? "",
-              upName: "",
-              upMid: "",
-            ),
-            mediaFiles: [],
-            taskId: _currentTaskId,
-            parentDirPath: entryDir.parent.path,
-            parentId: parentId,
-            id: id,
-            name: entry.name,
-            url: mediaFileInfo.video.first.baseUrl,
-            size: entry.totalBytes,
-            length: mediaFileInfo.duration,
-            progress: entry.downloadedBytes,
-            status: 0,
-            header: httpHeader,
-          ),
-          callback: this,
-        );
-        
-        curDownload.value = currentDownloadInfo;
-        final videoFile = File(path.join(videoDir.path, "video.m4s"));
-        _downloadManager?.start(videoFile);
-
-        final audio = mediaFileInfo.audio;
-        if (audio != null && audio.isNotEmpty) {
-          _audioDownloadManager = DownloadManager.withParams(
-            downloadInfo: CurrentDownloadInfo(
-              entryInfo: BiliDownloadEntryInfo(
-                title: entry.title,
-                cover: entry.cover ?? "",
-                preferedVideoQuality: entry.preferedVideoQuality ?? 0,
-                durlBackupUrl: "",
-                totalBytes: audio.first.size,
-                downloadedBytes: 0,
-                filePath: entryDir.path,
-                taskId: _currentTaskId.toString(),
-                type: "audio",
-                state: 0,
-                errorMsg: "",
-                createTime: DateTime.now().millisecondsSinceEpoch,
-                finishTime: 0,
-                aid: entry.avid?.toString() ?? "",
-                cid: entry.pageData?.cid?.toString() ?? "",
-                bvid: entry.bvid ?? "",
-                seasonId: entry.seasonId ?? "",
-                episodeId: entry.ep?.episodeId?.toString() ?? "",
-                upName: "",
-                upMid: "",
-              ),
-              mediaFiles: [],
-              taskId: _currentTaskId,
-              parentDirPath: entryDir.parent.path,
-              parentId: parentId,
-              id: id,
-              name: entry.name,
-              url: audio.first.baseUrl,
-              size: audio.first.size,
-              length: mediaFileInfo.duration,
-              progress: 0,
-              status: 0,
-              header: httpHeader,
-            ),
-            callback: _AudioDownloadCallback(this),
-          );
-          
-          final audioFile = File(path.join(videoDir.path, "audio.m4s"));
-          _audioDownloadManager?.start(audioFile);
-        }
-      }
-    } catch (e) {
-      curDownload.value = currentDownloadInfo.copyWith(
-        status: CurrentDownloadInfo.STATUS_FAIL_PLAYURL,
-      );
-      print("获取播放地址失败: $e");
-    }
-  }
-
-  // 完成下载
-  void _completeDownload() {
-    final current = curDownload.value;
-    if (current == null) return;
-
-    final entryAndPathInfo = downloadList.firstWhereOrNull(
-      (element) => current.id == element.entry.key
-    );
-
-    if (entryAndPathInfo != null) {
-      entryAndPathInfo.entry.downloadedBytes = current.progress;
-      entryAndPathInfo.entry.totalBytes = current.size;
-      entryAndPathInfo.entry.isCompleted = true;
-      entryAndPathInfo.entry.totalTimeMilli = current.length * 1000;
-      
-      // 更新entry.json文件
-      final entryJsonFile = File(path.join(entryAndPathInfo.entryDirPath, "entry.json"));
-      // 简化处理，实际应将entry对象转换为JSON并保存
-    }
-
     curDownload.value = null;
-    _downloadManager = null;
-    _audioDownloadManager = null;
-    _nextDownload();
-  }
-
-  // 下一个下载任务
-  void _nextDownload() {
-    if (waitDownloadQueue.isNotEmpty) {
-      final next = waitDownloadQueue.removeAt(0);
-      if (downloadList.any((element) => element.entry.key == next.entry.key)) {
-        startDownload(next);
-      } else {
-        _nextDownload();
-      }
-    }
-  }
-
-  // 获取下载路径
-  Future<String> _getDownloadPath() async {
-    // 使用指定的Android下载目录
-    final downloadDir = Directory("/storage/emulated/0/Download/Biliown");
-    if (!downloadDir.existsSync()) {
-      downloadDir.createSync(recursive: true);
-      // 创建.noMedia文件以防止媒体扫描器扫描该目录
-      File(path.join(downloadDir.path, ".nomedia")).createSync();
-    } else {
-      // 确保.noMedia文件存在
-      final noMediaFile = File(path.join(downloadDir.path, ".nomedia"));
-      if (!noMediaFile.existsSync()) {
-        noMediaFile.createSync();
-      }
-    }
-    return downloadDir.path;
-  }
-
-  // 获取下载文件目录
-  Future<Directory> _getDownloadFileDir(DownloadEntryInfo entry) async {
-    String dirName = "";
-    String pageDirName = "";
-
-    if (entry.ep != null) {
-      dirName = "s_${entry.seasonId}";
-      pageDirName = entry.ep!.episodeId.toString();
-    }
-
-    if (entry.pageData != null) {
-      dirName = entry.avid?.toString() ?? "";
-      pageDirName = "c_${entry.pageData!.cid}";
-    }
-
-    final downloadPath = await _getDownloadPath();
-    final downloadDir = Directory(path.join(downloadPath, dirName));
-    if (!downloadDir.existsSync()) {
-      downloadDir.createSync(recursive: true);
-      // 创建.noMedia文件以防止媒体扫描器扫描该目录
-      File(path.join(downloadDir.path, ".nomedia")).createSync();
-    } else {
-      // 确保.noMedia文件存在
-      final noMediaFile = File(path.join(downloadDir.path, ".nomedia"));
-      if (!noMediaFile.existsSync()) {
-        noMediaFile.createSync();
-      }
-    }
-
-    final pageDir = Directory(path.join(downloadDir.path, pageDirName));
-    if (!pageDir.existsSync()) {
-      pageDir.createSync(recursive: true);
-      // 创建.noMedia文件以防止媒体扫描器扫描该目录
-      File(path.join(pageDir.path, ".nomedia")).createSync();
-    } else {
-      // 确保.noMedia文件存在
-      final noMediaFile = File(path.join(pageDir.path, ".nomedia"));
-      if (!noMediaFile.existsSync()) {
-        noMediaFile.createSync();
-      }
-    }
-
-    return pageDir;
-  }
-
-  // DownloadCallback实现
-  @override
-  void onTaskRunning(CurrentDownloadInfo info) {
-    curDownload.value = info;
-  }
-
-  @override
-  void onTaskComplete(CurrentDownloadInfo info) {
-    if (info.size == 0 || info.size != info.progress) {
-      return;
-    }
-
-    if (_audioDownloadManager?.downloadInfo?.status == CurrentDownloadInfo.STATUS_DOWNLOADING) {
-      curDownload.value = info.copyWith(
-        status: CurrentDownloadInfo.STATUS_AUDIO_DOWNLOADING
-      );
-    } else if (_audioDownloadManager?.downloadInfo?.status == CurrentDownloadInfo.STATUS_FAIL_DOWNLOAD) {
-      // 重新下载音频
-      // TODO: 实现重新下载逻辑
-    } else {
-      _completeDownload();
-    }
-  }
-
-  @override
-  void onTaskError(CurrentDownloadInfo info, Object error) {
-    print("下载出错: $error");
-    curDownload.value = info.copyWith(
-      status: CurrentDownloadInfo.STATUS_FAIL_DOWNLOAD
-    );
-  }
-
-  // 暂停下载
-  void pauseDownload() {
-    if (_downloadManager != null && !_isPaused) {
-      _downloadManager!.cancel(); // 使用现有的cancel方法暂停下载
-      _isPaused = true;
-      // 更新状态为暂停
-      if (curDownload.value != null) {
-        curDownload.value = curDownload.value!.copyWith(
-          status: CurrentDownloadInfo.STATUS_FAIL_DOWNLOAD, // 使用失败状态表示暂停
-        );
-      }
-    }
-  }
-
-  // 恢复下载
-  void resumeDownload() {
-    if (_isPaused && curDownload.value != null) {
-      _isPaused = false;
-      // 重新开始当前下载任务
-      final currentEntry = downloadList.firstWhereOrNull(
-        (element) => curDownload.value!.id == element.entry.key
-      );
-      if (currentEntry != null) {
-        startDownload(currentEntry);
-      }
-    }
-  }
-
-  // 取消下载
-  void cancelDownload() {
-    _isPaused = false;
-    if (_downloadManager != null) {
-      _downloadManager!.cancel();
-    }
-    if (_audioDownloadManager != null) {
-      _audioDownloadManager!.cancel();
-    }
-    curDownload.value = null;
-    _downloadManager = null;
-    _audioDownloadManager = null;
-    _nextDownload();
-  }
-  
-  // 获取当前下载进度（0.0 - 1.0）
-  double getCurrentProgress() {
-    if (_downloadManager != null) {
-      return _downloadManager!.getCurrentProgress();
-    }
-    return 0.0;
   }
 }
-
-// 音频下载回调
-class _AudioDownloadCallback implements DownloadCallback {
-  _AudioDownloadCallback(this._parent);
-
-  final DownloadService _parent;
-
-  @override
-  void onTaskRunning(CurrentDownloadInfo info) {
-    // 更新主下载管理器的进度
-    _parent.curDownload.value = _parent.curDownload.value!.copyWith(
-      progress: _parent.curDownload.value!.progress + info.progress,
-      size: _parent.curDownload.value!.size + info.size,
-    );
-  }
-
-  @override
-  void onTaskComplete(CurrentDownloadInfo info) {
-    if (_parent._downloadManager?.downloadInfo?.status == CurrentDownloadInfo.STATUS_COMPLETED) {
-      _parent._completeDownload();
-    }
-  }
-
-  @override
-  void onTaskError(CurrentDownloadInfo info, Object error) {
-    // 音频下载出错处理
-    print("音频下载出错: $error");
-    _parent.curDownload.value = _parent.curDownload.value!.copyWith(
-      status: CurrentDownloadInfo.STATUS_FAIL_DOWNLOAD
-    );
-  }
-}
-
-// 获取播放地址
-  Future<DownloadMediaFileInfo> _getPlayUrl(DownloadEntryInfo entry) async {
-    // 调用B站API获取真实的播放地址
-    final videoInfo = await VideoPlayApi.getVideoPlay(
-      bvid: entry.bvid ?? "",
-      cid: entry.pageData?.cid ?? entry.source?.cid ?? 0,
-    );
-    
-    // 转换为DownloadMediaFileInfo
-    if (videoInfo.videos.isNotEmpty) {
-      return Type2MediaFileInfo(
-        duration: videoInfo.timeLength,
-        video: videoInfo.videos.map((v) => Type2File(
-          id: v.quality.index,
-          baseUrl: v.urls.first,
-          backupUrl: v.urls.length > 1 ? v.urls.sublist(1) : null,
-          bandwidth: v.bandWidth,
-          codecid: 0, // 需要根据实际codecs解析
-          size: 0, // 需要从API获取
-          md5: "",
-          noRexcode: false,
-        )).toList(),
-        audio: videoInfo.audios.map((a) => Type2File(
-          id: a.quality.index,
-          baseUrl: a.urls.first,
-          backupUrl: a.urls.length > 1 ? a.urls.sublist(1) : null,
-          bandwidth: a.bandWidth,
-          codecid: 0, // 需要根据实际codecs解析
-          size: 0, // 需要从API获取
-          md5: "",
-          noRexcode: false,
-        )).toList(),
-      );
-    }
-    
-    // 返回空的媒体文件信息
-    return NoneMediaFileInfo("无法获取播放地址");
-  }

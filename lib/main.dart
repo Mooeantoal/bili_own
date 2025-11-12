@@ -1,15 +1,13 @@
 import 'package:bili_own/common/utils/bili_own_storage.dart';
 import 'package:bili_own/common/utils/http_utils.dart';
 import 'package:bili_own/common/utils/settings.dart';
-import 'package:bili_own/pages/bili_video/index.dart';
+import 'package:bili_own/common/utils/simple_download_service.dart';
 import 'package:bili_own/pages/main/index.dart';
 import 'package:dynamic_color/dynamic_color.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:media_kit/media_kit.dart';
-// 导入下载服务
-import 'package:bili_own/pages/download/download_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -34,10 +32,9 @@ class MyApp extends StatelessWidget {
       return GetMaterialApp(
           onInit: () async {
             await HttpUtils().init();
-            // 初始化下载服务
-            Get.put(DownloadService());
+            // 初始化简化版下载服务
+            Get.put(SimpleDownloadService());
           },
-          navigatorObservers: [BiliVideoPage.routeObserver],
           useInheritedMediaQuery: true,
           themeMode: SettingsUtil.currentThemeMode,
           theme: ThemeData(
