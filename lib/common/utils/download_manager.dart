@@ -130,8 +130,9 @@ class DownloadManager {
       mediaFiles: mediaFiles,
     );
 
-    // 创建下载目录 - 修改为指定的Android下载目录
-    final String downloadDir = "/storage/emulated/0/Download/Biliown";
+    // 创建下载目录
+    final Directory appDir = await getApplicationDocumentsDirectory();
+    final String downloadDir = path.join(appDir.path, 'downloads');
     await Directory(downloadDir).create(recursive: true);
 
     // 更新下载信息
