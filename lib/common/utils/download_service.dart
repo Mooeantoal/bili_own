@@ -10,6 +10,7 @@ import 'package:bili_own/common/models/local/download/current_download_info.dart
 import 'package:bili_own/common/models/local/download/bili_download_entry_info.dart';
 import 'package:bili_own/common/api/video_play_api.dart';
 import 'package:bili_own/common/utils/bili_own_storage.dart';
+import 'package:bili_own/common/utils/permission_utils.dart';
 
 // 下载条目和路径信息
 class DownloadEntryAndPathInfo {
@@ -44,6 +45,13 @@ class DownloadService extends GetxController implements DownloadCallback {
 
   // 读取下载列表
   void _readDownloadList() async {
+    // 检查并请求存储权限
+    final hasPermission = await PermissionUtils.requestStoragePermission();
+    if (!hasPermission) {
+      print("存储权限被拒绝，无法读取下载列表");
+      return;
+    }
+    
     final downloadPath = await _getDownloadPath();
     final downloadDir = Directory(downloadPath);
     if (!downloadDir.existsSync()) {
@@ -115,6 +123,14 @@ class DownloadService extends GetxController implements DownloadCallback {
 
   // 创建下载任务
   void createDownload(DownloadEntryInfo entry) async {
+    // 检查并请求存储权限
+    final hasPermission = await PermissionUtils.requestStoragePermission();
+    if (!hasPermission) {
+      print("存储权限被拒绝，无法创建下载任务");
+      Get.rawSnackbar(title: "权限错误", message: "需要存储权限才能下载视频");
+      return;
+    }
+    
     final entryDir = await _getDownloadFileDir(entry);
     
     // 保存视频信息
@@ -163,6 +179,14 @@ class DownloadService extends GetxController implements DownloadCallback {
 
   // 开始下载
   void startDownload(DownloadEntryAndPathInfo biliDownInfo) async {
+    // 检查并请求存储权限
+    final hasPermission = await PermissionUtils.requestStoragePermission();
+    if (!hasPermission) {
+      print("存储权限被拒绝，无法开始下载");
+      Get.rawSnackbar(title: "权限错误", message: "需要存储权限才能下载视频");
+      return;
+    }
+    
     // 取消当前任务
     if (_downloadManager != null) {
       _downloadManager!.cancelDownload(_currentTaskId.toString());
@@ -403,8 +427,8 @@ class DownloadService extends GetxController implements DownloadCallback {
 
   // 获取下载路径
   Future<String> _getDownloadPath() async {
-    final appDocDir = await getApplicationSupportDirectory();
-    final downloadDir = Directory(path.join(appDocDir.path, "download"));
+    // 使用指定的Android下载目录
+    final downloadDir = Directory("/storage/emulated/0/Download/Biliown");
     if (!downloadDir.existsSync()) {
       downloadDir.createSync(recursive: true);
     }
