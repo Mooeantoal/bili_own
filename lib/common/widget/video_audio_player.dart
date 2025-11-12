@@ -214,7 +214,7 @@ class VideoAudioController {
   // 如果还需要换音视频源的话，还需要在调用前改变videoUrl,audioUrl
   Future<void> refresh() async {
     //重置几个值
-    // state.isEnd = false;
+    state.isEnd = false;
     state.isBuffering = false;
     state.buffered = Duration.zero;
     state.hasError = false;

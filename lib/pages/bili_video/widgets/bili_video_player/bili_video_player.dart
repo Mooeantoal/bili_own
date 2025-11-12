@@ -209,19 +209,24 @@ class BiliVideoPlayerController {
   }
 
   Future<bool> loadVideoInfo(String bvid, int cid) async {
+    log("加载视频信息: bvid=$bvid, cid=$cid");
     if (videoPlayInfo == null) {
       try {
         //加载视频播放信息
         videoPlayInfo = await VideoPlayApi.getVideoPlay(bvid: bvid, cid: cid);
-      } catch (e) {
+        log("获取到视频播放信息: videos=${videoPlayInfo?.videos.length}, audios=${videoPlayInfo?.audios.length}");
+      } catch (e, stackTrace) {
         log("bili_video_player.loadVideo:$e");
+        log("错误堆栈: $stackTrace");
         return false;
       }
     }
-    if (videoPlayInfo!.videos.isEmpty) {
+    
+    if (videoPlayInfo == null || videoPlayInfo!.videos.isEmpty) {
       log("bili_video_player.loadVideo: videoPlayInfo is null or videos is empty");
       return false;
     }
+    
     if (_videoPlayItem == null) {
       //根据偏好选择画质
       List<VideoPlayItem> tempMatchVideos = [];
@@ -246,7 +251,9 @@ class BiliVideoPlayerController {
         }
       }
       _videoPlayItem = matchedVideo;
+      log("选择视频画质: quality=${matchedVideo.quality}, codecs=${matchedVideo.codecs}, url=${matchedVideo.urls.first}");
     }
+    
     if (_audioPlayItem == null && videoPlayInfo!.audios.isNotEmpty) {
       //根据偏好选择音质
       //根据AudioQuality下标判断最接近的音质
@@ -259,19 +266,26 @@ class BiliVideoPlayerController {
         }
       }
       _audioPlayItem = matchedAudio;
+      log("选择音频音质: quality=${matchedAudio.quality}, codecs=${matchedAudio.codecs}, url=${matchedAudio.urls.first}");
     } else if (videoPlayInfo!.audios.isEmpty) {
       _audioPlayItem = null;
+      log("没有音频信息");
     }
     return true;
   }
 
   Future<bool> initPlayer(String bvid, int cid) async {
+    log("初始化播放器: bvid=$bvid, cid=$cid");
     //如果不是第一次的话就跳过
     if (_videoAudioController != null) {
+      log("播放器已初始化，跳过");
       return true;
     }
     //加载视频播放信息
-    if (await loadVideoInfo(bvid, cid) == false) return false;
+    if (await loadVideoInfo(bvid, cid) == false) {
+      log("加载视频信息失败");
+      return false;
+    }
     //获取视频，音频的url
     if (_videoPlayItem == null) {
       log("bili_video_player.initPlayer: videoPlayItem is null");
@@ -285,6 +299,9 @@ class BiliVideoPlayerController {
       log("bili_video_player.initPlayer: videoUrl is empty");
       return false;
     }
+    
+    log("视频URL: $videoUrl");
+    log("音频URL: $audioUrl");
 
     //创建播放器
     _videoAudioController = VideoAudioController(
@@ -296,6 +313,7 @@ class BiliVideoPlayerController {
         initStart: _playWhenInitialize);
 
     await _videoAudioController!.init();
+    log("播放器初始化完成");
 
     //是否进入就全屏
     bool isFullScreenPlayOnEnter = BiliOwnStorage.settings

@@ -34,21 +34,32 @@ class VideoPlayApi {
     required int cid,
   }) async {
     try {
+      print("请求视频播放信息: bvid=$bvid, cid=$cid");
       var response =
           await _requestVideoPlay(bvid: bvid, cid: cid, fnval: _Fnval.dash.code);
+      print("收到响应: code=${response.code}, message=${response.message}");
+      
       if (response.code != 0) {
+        print("视频播放API返回错误: code=${response.code}, message=${response.message}");
         throw "getVideoPlay: code:${response.code}, message:${response.message}";
       }
-      if (response.data == null ||
-          response.data!.acceptQuality == null ||
-          response.data!.acceptDescription == null) {
+      
+      if (response.data == null) {
+        print("视频播放数据为空");
         return VideoPlayInfo.zero;
       }
+      
+      if (response.data!.acceptQuality == null || response.data!.acceptDescription == null) {
+        print("视频播放数据不完整: acceptQuality=${response.data!.acceptQuality}, acceptDescription=${response.data!.acceptDescription}");
+        return VideoPlayInfo.zero;
+      }
+      
       //获取支持的视频质量
       List<VideoQuality> supportVideoQualities = [];
       for (var i in response.data!.acceptQuality ?? <int>[]) {
         supportVideoQualities.add(VideoQualityCode.fromCode(i));
       }
+      
       //获取视频
       List<VideoPlayItem> videos = [];
       for (var i in response.data!.dash?.video ?? <VideoOrAudioRaw>[]) {
@@ -68,6 +79,7 @@ class VideoPlayApi {
             height: i.height ?? 0,
             frameRate: double.tryParse(i.frameRate ?? "0") ?? 0));
       }
+      
       //获取音频
       List<AudioPlayItem> audios = [];
       for (var i in response.data!.dash?.audio ?? <VideoOrAudioRaw>[]) {
@@ -84,6 +96,7 @@ class VideoPlayApi {
             bandWidth: i.bandwidth ?? 0,
             codecs: i.codecs ?? ""));
       }
+      
       //如果有dolby的话
       for (var i in response.data!.dash?.dolby?.audio ?? <VideoOrAudioRaw>[]) {
         List<String> urls = [];
@@ -99,6 +112,7 @@ class VideoPlayApi {
             bandWidth: i.bandwidth ?? 0,
             codecs: i.codecs ?? ""));
       }
+      
       //如果有flac的话
       List<String> flacUrls = [];
       if (response.data!.dash?.flac?.audio?.baseUrl != null) {
@@ -107,11 +121,14 @@ class VideoPlayApi {
       if (response.data!.dash?.flac?.audio?.backupUrl != null) {
         flacUrls.addAll(response.data!.dash!.flac!.audio!.backupUrl!);
       }
+      
       List<AudioQuality> supportAudioQualities = [];
       //获取支持的音质
       for (var i in audios) {
         supportAudioQualities.add(i.quality);
       }
+      
+      print("成功解析视频播放信息: videos=${videos.length}, audios=${audios.length}");
       return VideoPlayInfo(
           // defualtVideoQuality:
           //     VideoQualityCode.fromCode(response.data!.quality ?? -1),
@@ -122,8 +139,9 @@ class VideoPlayApi {
           audios: audios,
           lastPlayCid: response.data!.lastPlayCid ?? 0,
           lastPlayTime: Duration(milliseconds: response.data!.lastPlayTime ?? 0));
-    } catch (e) {
+    } catch (e, stackTrace) {
       print("获取视频播放信息失败: $e");
+      print("错误堆栈: $stackTrace");
       // 返回一个默认的VideoPlayInfo而不是zero，确保不会导致播放器崩溃
       return VideoPlayInfo(
         supportVideoQualities: [],

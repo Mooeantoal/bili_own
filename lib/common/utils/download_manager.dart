@@ -155,25 +155,84 @@ class DownloadManager {
     final String taskId = mediaFile.taskId;
     final String fileName = '$taskId.mp4';
     final String savePath = path.join(saveDir, fileName);
+    final File file = File(savePath);
 
     // 创建进度控制器
     _progressControllers[taskId] = StreamController<double>();
     _cancelTokens[taskId] = CancelToken();
 
     try {
-      await _dio.download(
+      // 设置下载状态
+      downloadInfo = currentDownloadInfo.copyWith(status: CurrentDownloadInfo.STATUS_DOWNLOADING);
+      callback?.onTaskRunning(downloadInfo!);
+
+      // 创建Dio实例并配置
+      final dio = Dio();
+      dio.options.connectTimeout = Duration(seconds: 120);
+      dio.options.receiveTimeout = Duration(seconds: 120);
+
+      // 设置请求头
+      if (currentDownloadInfo.header != null) {
+        dio.options.headers.addAll(currentDownloadInfo.header!);
+      }
+
+      // 检查文件是否已存在
+      var downloadLength = 0;
+      if (file.existsSync()) {
+        if (currentDownloadInfo.size == 0) {
+          file.deleteSync();
+        } else {
+          downloadLength = file.lengthSync();
+          downloadInfo = downloadInfo!.copyWith(progress: downloadLength);
+          callback?.onTaskRunning(downloadInfo!);
+        }
+      }
+
+      // 设置Range请求头以支持断点续传
+      if (downloadLength > 0 && currentDownloadInfo.size != 0) {
+        if (currentDownloadInfo.size == downloadLength) {
+          // 文件已下载完成
+          downloadInfo = downloadInfo!.copyWith(status: CurrentDownloadInfo.STATUS_COMPLETED);
+          callback?.onTaskComplete(downloadInfo!);
+          return;
+        }
+        dio.options.headers['Range'] = 'bytes=$downloadLength-${currentDownloadInfo.size}';
+      }
+
+      // 执行下载
+      await dio.download(
         mediaFile.downloadUrl,
         savePath,
         cancelToken: _cancelTokens[taskId],
         onReceiveProgress: (received, total) {
           if (total != -1) {
-            final progress = received / total;
-            _progressControllers[taskId]?.add(progress);
+            // 更新下载进度
+            final progress = downloadLength + received;
+            downloadInfo = downloadInfo!.copyWith(
+              progress: progress,
+              size: currentDownloadInfo.size == 0 ? total : currentDownloadInfo.size,
+            );
+            callback?.onTaskRunning(downloadInfo!);
+            
+            // 发送进度更新
+            final progressRatio = progress / (currentDownloadInfo.size == 0 ? total : currentDownloadInfo.size);
+            _progressControllers[taskId]?.add(progressRatio);
           }
         },
       );
+
+      // 下载完成
+      downloadInfo = downloadInfo!.copyWith(
+        status: CurrentDownloadInfo.STATUS_COMPLETED,
+        progress: file.lengthSync(),
+      );
+      callback?.onTaskComplete(downloadInfo!);
     } catch (e) {
-      // 处理下载错误
+      // 下载出错
+      if (downloadInfo != null) {
+        downloadInfo = downloadInfo!.copyWith(status: CurrentDownloadInfo.STATUS_FAIL_DOWNLOAD);
+        callback?.onTaskError(downloadInfo!, e);
+      }
       rethrow;
     } finally {
       // 清理资源

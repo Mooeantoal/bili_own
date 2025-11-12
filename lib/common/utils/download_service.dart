@@ -481,7 +481,11 @@ class _AudioDownloadCallback implements DownloadCallback {
 
   @override
   void onTaskRunning(CurrentDownloadInfo info) {
-    // 音频下载进度更新
+    // 更新主下载管理器的进度
+    _parent.curDownload.value = _parent.curDownload.value!.copyWith(
+      progress: _parent.curDownload.value!.progress + info.progress,
+      size: _parent.curDownload.value!.size + info.size,
+    );
   }
 
   @override
@@ -494,6 +498,10 @@ class _AudioDownloadCallback implements DownloadCallback {
   @override
   void onTaskError(CurrentDownloadInfo info, Object error) {
     // 音频下载出错处理
+    print("音频下载出错: $error");
+    _parent.curDownload.value = _parent.curDownload.value!.copyWith(
+      status: CurrentDownloadInfo.STATUS_FAIL_DOWNLOAD
+    );
   }
 }
 
