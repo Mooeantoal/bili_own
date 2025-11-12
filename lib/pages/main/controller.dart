@@ -5,7 +5,7 @@ import '../dynamic/view.dart';
 import '../user_menu/user_menu_page.dart';
 import '../search/view.dart';
 // 导入下载页面
-import '../download/view.dart';
+import '../download/download_page.dart';
 
 class MainController extends GetxController {
   MainController();
@@ -15,7 +15,7 @@ class MainController extends GetxController {
     const HomePage(),
     const DynamicPage(),
     const SearchPage(),
-    const DownloadPage(), // 添加下载页面
+    DownloadPage(), // 使用我们新创建的下载页面
     const UserMenuStandalonePage(),
   ];
 

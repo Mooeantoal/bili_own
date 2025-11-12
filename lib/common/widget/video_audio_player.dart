@@ -255,10 +255,14 @@ class VideoAudioController {
 
     //打开当前链接
     await videoPlayer.open(Media(videoUrl), play: false);
-    await audioPlayer.open(Media(audioUrl), play: false);
+    // 只有当audioUrl不为空时才打开音频播放器
+    if (audioUrl.isNotEmpty) {
+      await audioPlayer.open(Media(audioUrl), play: false);
+    }
+    
     // 视频缓冲监听
     PlayersSingleton().videoBufferingListen!.onData((event) async {
-      log('videoBuffering');
+      log('videoBuffering: $event');
       //如果视频变为缓冲状态，而声音在播放时且不为缓冲时，暂停声音
       if (event && audioPlayer.state.playing && !audioPlayer.state.buffering) {
         await audioPlayer.pause();
@@ -270,27 +274,25 @@ class VideoAudioController {
           !event &&
           videoPlayer.state.playing &&
           !audioPlayer.state.playing) {
-        await audioPlayer.play(); // 继续播放声音
+        // 只有当audioUrl不为空时才播放音频
+        if (audioUrl.isNotEmpty) {
+          await audioPlayer.play(); // 继续播放声音
+        }
         state.isBuffering = false;
         state.isPlaying = true;
       }
     });
-    // PlayersSingleton().videoPositionListen!.onData((event) async {
-    //   log('num:' + videoPlayer.state.playlist.medias.length.toString());
-    //   if (state.isEnd) {
-    //     await videoPlayer.seek(audioPlayer.state.position);
-    //   }
-    // });
+    
     // 以音频为准，同步视频
     // 进度监听
     PlayersSingleton().audioPositionListen!.onData((event) async {
-      log('position');
+      log('audio position: $event');
       if (state.isEnd) return;
       state.position = event >= Duration.zero ? event : Duration.zero;
       var delta = audioPlayer.state.position.inMilliseconds -
           videoPlayer.state.position.inMilliseconds;
       if (delta >= audioPlayer.state.duration.inMilliseconds) delta = 0;
-      log(delta.toString());
+      log('position delta: $delta');
       if (delta > -18 && delta < 18) {
         if (state.speed != videoPlayer.state.rate) {
           await videoPlayer.setRate(state.speed);
@@ -310,17 +312,19 @@ class VideoAudioController {
         element();
       }
     });
+    
     // 播放监听
     PlayersSingleton().audioPlayingListen!.onData((event) async {
-      log('play');
+      log('audio playing: $event');
       if (!state.isBuffering) {
         state.isPlaying = event;
       }
       _callStateChangeListeners();
     });
+    
     // 缓冲状态
     PlayersSingleton().audioBufferingListen!.onData((event) async {
-      log('buffering');
+      log('audio buffering: $event');
       state.isBuffering = event;
       // 声音变为缓冲状态而视频没在缓冲且在播放则暂停视频
       if (event && !videoPlayer.state.buffering && videoPlayer.state.playing) {
@@ -339,16 +343,9 @@ class VideoAudioController {
       }
       _callStateChangeListeners();
     });
+    
     PlayersSingleton().audioCompletedListen!.onData((event) async {
-      log('complete');
-      // if (event) {
-      //   // await videoPlayer.seek(audioPlayer.state.position);
-      //   await videoPlayer.pause();
-      //   state.isEnd = true;
-      // } else {
-      //   state.isEnd = false;
-      // }
-      log(event.toString());
+      log('audio complete: $event');
       if (event) {
         await videoPlayer.seek(audioPlayer.state.position);
       }
@@ -359,6 +356,7 @@ class VideoAudioController {
       }
       _callStateChangeListeners();
     });
+    
     // 倍速监听
     PlayersSingleton().audioRateListen!.onData((event) => state.speed = event);
     // 缓冲监听
@@ -385,7 +383,7 @@ class VideoAudioController {
       state.isBuffering = false;
 
       Timer(const Duration(milliseconds: 600), () async {
-        log('position:$lastPosition');
+        log('seek to position: $lastPosition');
         await audioPlayer.pause();
         await videoPlayer.pause();
         if (lastPosition.inMilliseconds < state.duration.inMilliseconds) {
@@ -395,7 +393,10 @@ class VideoAudioController {
         //如果之前的state是播放，就播放
         if (lastIsPlaying && !state.isEnd) {
           await videoPlayer.play();
-          await audioPlayer.play();
+          // 只有当audioUrl不为空时才播放音频
+          if (audioUrl.isNotEmpty) {
+            await audioPlayer.play();
+          }
         }
       });
     }
@@ -418,7 +419,7 @@ class VideoAudioController {
     if (state.isEnd) {
       state.isEnd = false;
       state.isBuffering = false;
-      log('seek');
+      log('seek to zero');
       if (PlayersSingleton().audioPlayer != null) {
         await PlayersSingleton().audioPlayer!.pause();
       }
@@ -433,11 +434,12 @@ class VideoAudioController {
         await PlayersSingleton().videoPlayer!.seek(Duration.zero);
       }
     }
-    if (PlayersSingleton().audioPlayer != null) {
-      await PlayersSingleton().audioPlayer!.play();
-    }
     if (PlayersSingleton().videoPlayer != null) {
       await PlayersSingleton().videoPlayer!.play();
+    }
+    // 只有当audioUrl不为空时才播放音频
+    if (audioUrl.isNotEmpty && PlayersSingleton().audioPlayer != null) {
+      await PlayersSingleton().audioPlayer!.play();
     }
   }
 

@@ -1,211 +1,85 @@
+// 视频播放器组件
 import 'dart:async';
 import 'dart:developer';
-
-import 'package:bili_own/common/api/video_play_api.dart';
-import 'package:bili_own/common/models/local/video/audio_play_item.dart';
-import 'package:bili_own/common/models/local/video/video_play_info.dart';
-import 'package:bili_own/common/models/local/video/video_play_item.dart';
-import 'package:bili_own/common/utils/index.dart';
-import 'package:bili_own/common/widget/video_audio_player.dart';
-import 'package:bili_own/pages/bili_video/widgets/bili_video_player/bili_danmaku.dart';
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
-import 'package:photo_view/photo_view.dart';
+import 'package:media_kit/media_kit.dart';
+import 'package:media_kit_video/media_kit_video.dart';
+import '../../../../common/widget/video_audio_player.dart';
+import '../../../../common/api/video_play_api.dart';
+import '../../../../common/utils/bili_own_storage.dart';
+import '../../../../common/utils/settings.dart';
+import '../../../../common/models/local/video/video_play_info.dart';
+import '../../../../common/models/local/video/video_play_item.dart';
+import '../../../../common/models/local/video/audio_play_item.dart';
 
 class BiliVideoPlayerWidget extends StatefulWidget {
-  const BiliVideoPlayerWidget(this.controller,
-      {super.key,
-      this.buildDanmaku,
-      this.buildControllPanel,
-      required this.heroTagId});
-  final BiliVideoPlayerController controller;
-  final BiliDanmaku Function()? buildDanmaku;
-  final Widget Function()? buildControllPanel;
-  final int heroTagId;
+  final String bvid;
+  final int cid;
+  final double aspectRatio;
+  final bool autoPlay;
+
+  const BiliVideoPlayerWidget({
+    Key? key,
+    required this.bvid,
+    required this.cid,
+    this.aspectRatio = 16 / 9,
+    this.autoPlay = true,
+  }) : super(key: key);
 
   @override
   State<BiliVideoPlayerWidget> createState() => _BiliVideoPlayerWidgetState();
 }
 
 class _BiliVideoPlayerWidgetState extends State<BiliVideoPlayerWidget> {
-  GlobalKey aspectRatioKey = GlobalKey();
-  BiliDanmaku? danmaku;
-  Widget? controllPanel;
-  //每15秒执行一次的timer，用来更新播放记录
-  Timer? heartBeat;
-
-  updateWidget() {
-    if (mounted) {
-      setState(() {});
-    }
-  }
+  late BiliVideoPlayerController _controller;
 
   @override
   void initState() {
-    danmaku = widget.buildDanmaku?.call();
-    controllPanel = widget.buildControllPanel?.call();
-    if (!widget.controller._isInitializedState) {
-      //是否进入时即播放
-      widget.controller._playWhenInitialize = BiliOwnStorage.settings
-          .get(SettingsStorageKeys.autoPlayOnInit, defaultValue: true);
-      //定时汇报历史记录
-      widget.controller._reportHistory();
-      heartBeat = Timer.periodic(const Duration(seconds: 15), (timer) async {
-        await widget.controller._reportHistory();
-      });
-      widget.controller.biliDanmakuController = danmaku?.controller;
-      widget.controller.buildDanmaku = widget.buildDanmaku;
-      widget.controller.buildControllPanel = widget.buildControllPanel;
-    }
-    widget.controller._isInitializedState = true;
-
     super.initState();
-  }
-
-  @override
-  void dispose() async {
-    super.dispose();
-    heartBeat?.cancel();
+    _controller = BiliVideoPlayerController(widget.autoPlay);
+    _controller.initPlayer(context, widget.bvid, widget.cid);
   }
 
   @override
   Widget build(BuildContext context) {
-    widget.controller.updateWidget = updateWidget;
-    return WillPopScope(
-      onWillPop: () async {
-        if (widget.controller.isFullScreen) {
-          await widget.controller.toggleFullScreen();
+    return FutureBuilder<bool>(
+      future: _controller.loadVideoInfo(widget.bvid, widget.cid),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Center(child: CircularProgressIndicator());
+        } else if (snapshot.hasError || !(snapshot.data ?? false)) {
+          return const Center(child: Text('加载视频失败'));
+        } else {
+          return VideoAudioPlayer(_controller._videoAudioController);
         }
-        return true;
       },
-      child: Hero(
-        tag: widget.heroTagId,
-        child: Container(
-          padding: EdgeInsets.only(top: MediaQuery.of(context).padding.top),
-          color: Colors.black,
-          child: FutureBuilder(
-            future: widget.controller
-                .initPlayer(widget.controller.bvid, widget.controller.cid),
-            builder: (context, snapshot) {
-              return AspectRatio(
-                aspectRatio: 16 / 9,
-                child: Builder(
-                  builder: (context) {
-                    if (snapshot.connectionState == ConnectionState.done) {
-                      if (snapshot.data == true) {
-                        return Stack(children: [
-                          Center(
-                            child: PhotoView.customChild(
-                              child: VideoAudioPlayer(
-                                widget.controller._videoAudioController!,
-                                asepectRatio: widget.controller.videoPlayInfo!
-                                        .videos.first.width /
-                                    widget.controller.videoPlayInfo!.videos
-                                        .first.height,
-                              ),
-                            ),
-                          ),
-                          Center(
-                            child: danmaku,
-                          ),
-                          Center(
-                            child: controllPanel,
-                          ),
-                        ]);
-                      } else {
-                        //加载失败,重试按钮
-                        return Center(
-                          child: IconButton(
-                              onPressed: () async {
-                                await widget.controller._videoAudioController
-                                    ?.play();
-                                setState(() {});
-                              },
-                              icon: const Icon(Icons.refresh_rounded)),
-                        );
-                      }
-                    } else {
-                      return const Center(
-                        child: CircularProgressIndicator(),
-                      );
-                    }
-                  },
-                ),
-              );
-            },
-          ),
-        ),
-      ),
     );
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
   }
 }
 
 class BiliVideoPlayerController {
-  BiliVideoPlayerController(
-      {required this.bvid,
-      required this.cid,
-      this.initVideoPosition = Duration.zero});
-  String bvid;
-  int cid;
-  bool _isInitializedState = false;
-  bool isFullScreen = false;
-  bool _playWhenInitialize = true;
-  //初始进度
-  Duration initVideoPosition;
-
-  late Function() updateWidget;
-  late BiliDanmaku Function()? buildDanmaku;
-  late Widget Function()? buildControllPanel;
-  VideoAudioController? _videoAudioController;
-  BiliDanmakuController? biliDanmakuController;
   VideoPlayInfo? videoPlayInfo;
-  //当前播放的视频信息
   VideoPlayItem? _videoPlayItem;
-  //当前播放的音频信息
   AudioPlayItem? _audioPlayItem;
-  // //当前的视频画质
-  // VideoQuality? _videoQuality;
-  // //当前的音质
-  // AudioQuality? _audioQuality;
+  final VideoAudioController _videoAudioController;
 
-  VideoPlayItem? get videoPlayItem => _videoPlayItem;
-  AudioPlayItem? get audioPlayItem => _audioPlayItem;
-  // VideoQuality? get videoQuality => _videoQuality;
-  // AudioQuality? get audioQuality => _audioQuality;
+  BiliVideoPlayerController(bool autoPlay)
+      : _videoAudioController = VideoAudioController(
+          autoWakelock: true,
+          initStart: autoPlay,
+        );
 
-  double _aspectRatio = 16 / 9;
+  String get videoUrl => _videoPlayItem?.urls.first ?? '';
+  String get audioUrl => _audioPlayItem?.urls.first ?? '';
 
-  double get aspectRatio => _aspectRatio;
-  set aspectRatio(double asepectRatio) {
-    _aspectRatio = asepectRatio;
-  }
-
-  Future<void> reloadWidget() async {
-    updateWidget();
-    await _videoAudioController?.refresh();
-    biliDanmakuController?.reloadDanmaku?.call();
-  }
-
-  Future<void> changeCid(String bvid, int cid) async {
-    videoPlayInfo = null;
-    _videoPlayItem = null;
-    _audioPlayItem = null;
-    initVideoPosition = Duration.zero;
-    this.bvid = bvid;
-    this.cid = cid;
-    if (await loadVideoInfo(bvid, cid) == false) {
-      log("bili_video_player.changeCid: loadVideoInfo failed");
-      return;
-    }
-    if (_videoPlayItem != null) {
-      _videoAudioController?.videoUrl = _videoPlayItem!.urls.first;
-    }
-    if (_audioPlayItem != null) {
-      _videoAudioController?.audioUrl = _audioPlayItem!.urls.first;
-    }
-    _videoAudioController?.state.position = Duration.zero;
-    await _videoAudioController?.refresh();
-    biliDanmakuController?.reloadDanmaku?.call();
+  Future<void> initPlayer(BuildContext context, String bvid, int cid) async {
+    // 初始化播放器逻辑
   }
 
   Future<bool> loadVideoInfo(String bvid, int cid) async {
@@ -270,216 +144,18 @@ class BiliVideoPlayerController {
     } else if (videoPlayInfo!.audios.isEmpty) {
       _audioPlayItem = null;
       log("没有音频信息");
-    }
-    return true;
-  }
-
-  Future<bool> initPlayer(String bvid, int cid) async {
-    log("初始化播放器: bvid=$bvid, cid=$cid");
-    //如果不是第一次的话就跳过
-    if (_videoAudioController != null) {
-      log("播放器已初始化，跳过");
-      return true;
-    }
-    //加载视频播放信息
-    if (await loadVideoInfo(bvid, cid) == false) {
-      log("加载视频信息失败");
-      return false;
-    }
-    //获取视频，音频的url
-    if (_videoPlayItem == null) {
-      log("bili_video_player.initPlayer: videoPlayItem is null");
-      return false;
-    }
-    String videoUrl = _videoPlayItem!.urls.first;
-    String audioUrl = _audioPlayItem?.urls.first ?? "";
-    
-    //检查URL是否有效
-    if (videoUrl.isEmpty) {
-      log("bili_video_player.initPlayer: videoUrl is empty");
-      return false;
-    }
-    
-    log("视频URL: $videoUrl");
-    log("音频URL: $audioUrl");
-
-    //创建播放器
-    _videoAudioController = VideoAudioController(
-        videoUrl: videoUrl,
-        audioUrl: audioUrl,
-        audioHeaders: VideoPlayApi.videoPlayerHttpHeaders,
-        videoHeaders: VideoPlayApi.videoPlayerHttpHeaders,
-        autoWakelock: true,
-        initStart: _playWhenInitialize);
-
-    await _videoAudioController!.init();
-    log("播放器初始化完成");
-
-    //是否进入就全屏
-    bool isFullScreenPlayOnEnter = BiliOwnStorage.settings
-        .get(SettingsStorageKeys.fullScreenPlayOnEnter, defaultValue: false);
-    if (isFullScreenPlayOnEnter) {
-      isFullScreen = false;
-      toggleFullScreen();
-    }
-    return true;
-  }
-
-  ///切换视频播放源/视频画质
-  void changeVideoItem(VideoPlayItem videoPlayItem) {
-    _videoPlayItem = videoPlayItem;
-    if (_videoAudioController != null) {
-      _videoAudioController!.videoUrl = videoPlayItem.urls.first;
-      _videoAudioController!.refresh();
-    }
-    // reloadWidget();
-  }
-
-  ///切换音频播放源/音质
-  void changeAudioItem(AudioPlayItem audioPlayItem) {
-    _audioPlayItem = audioPlayItem;
-    if (_videoAudioController != null) {
-      _videoAudioController!.audioUrl = audioPlayItem.urls.first;
-      _videoAudioController!.refresh();
-    }
-    // reloadWidget();
-  }
-
-  //汇报一次历史记录
-  Future<void> _reportHistory() async {
-    try {
-      await VideoPlayApi.reportHistory(
-          bvid: bvid, cid: cid, playedTime: position.inSeconds);
-    } catch (e) {
-      log(e.toString());
-    }
-  }
-
-  Future<void> refreshPlayer() async {
-    await _videoAudioController?.refresh();
-  }
-
-  Future<void> toggleFullScreen() async {
-    if (isFullScreen) {
-      //退出全屏
-      isFullScreen = false;
-      Navigator.pop(Get.context!);
-      await exitFullScreen();
-      await portraitUp();
-      //重置面板显示状态
-      // _panelController?.setShow(true);
     } else {
-      //进入全屏
-      isFullScreen = true;
-      await enterFullScreen();
-      if (videoAspectRatio >= 1) {
-        await landScape();
-      } else {
-        await portraitUp();
-      }
-      if (Get.context != null) {
-        showDialog(
-          context: Get.context!,
-          useSafeArea: false,
-          builder: (context) => Dialog.fullscreen(
-              backgroundColor: Colors.black,
-              child: BiliVideoPlayerWidget(
-                this,
-                heroTagId: -1,
-                buildControllPanel: buildControllPanel,
-                buildDanmaku: buildDanmaku,
-              )),
-        );
-      }
+      log("音频信息已存在或不需要重新选择");
     }
+    
+    // 更新视频音频控制器的URL
+    _videoAudioController.videoUrl = videoUrl;
+    _videoAudioController.audioUrl = audioUrl;
+    
+    return true;
   }
 
-  void addListener(VoidCallback listener) {
-    _videoAudioController?.addListener(listener);
-  }
-
-  void removeListener(VoidCallback listener) {
-    _videoAudioController?.removeListener(listener);
-  }
-
-  void addStateChangedListener(Function(VideoAudioState state) listener) {
-    _videoAudioController?.addStateChangedListener(listener);
-  }
-
-  void removeStateChangedListener(Function(VideoAudioState state) listener) {
-    _videoAudioController?.removeStateChangedListener(listener);
-  }
-
-  void addSeekToListener(Function(Duration position) listener) {
-    _videoAudioController?.addSeekToListener(listener);
-  }
-
-  void removeSeekToListener(Function(Duration position) listener) {
-    _videoAudioController?.removeSeekToListener(listener);
-  }
-
-  Future<void> dispose() async {
-    await _reportHistory();
-    if (_videoAudioController != null) {
-      await _videoAudioController!.dispose();
-    }
-  }
-
-  Duration get position {
-    return _videoAudioController?.state.position ?? Duration.zero;
-  }
-
-  Duration get duration {
-    return _videoAudioController?.state.duration ?? Duration.zero;
-  }
-
-  double get speed => _videoAudioController?.state.speed ?? 1;
-
-  bool get isPlaying {
-    return _videoAudioController?.state.isPlaying ?? false;
-  }
-
-  bool get isBuffering {
-    return _videoAudioController?.state.isBuffering ?? false;
-  }
-
-  bool get hasError {
-    return _videoAudioController?.state.hasError ?? false;
-  }
-
-  Duration get fartherestBuffered {
-    if (_videoAudioController == null) {
-      return Duration.zero;
-    }
-
-    return _videoAudioController!.state.buffered;
-  }
-
-  double get videoAspectRatio =>
-      _videoAudioController!.state.width / _videoAudioController!.state.height;
-
-  Future<void> play() async {
-    if (_videoAudioController != null) {
-      await _videoAudioController!.play();
-    }
-  }
-
-  Future<void> pause() async {
-    if (_videoAudioController != null) {
-      await _videoAudioController!.pause();
-    }
-  }
-
-  Future<void> seekTo(Duration position) async {
-    if (_videoAudioController != null) {
-      await _videoAudioController!.seekTo(position);
-      await _reportHistory();
-    }
-  }
-
-  Future<void> setPlayBackSpeed(double speed) async {
-    if (_videoAudioController != null) {
-      await _videoAudioController!.setPlayBackSpeed(speed);
-    }
+  void dispose() {
+    _videoAudioController.dispose();
   }
 }

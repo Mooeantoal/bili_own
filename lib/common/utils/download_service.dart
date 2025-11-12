@@ -11,6 +11,7 @@ import 'package:bili_own/common/models/local/download/bili_download_entry_info.d
 import 'package:bili_own/common/api/video_play_api.dart';
 import 'package:bili_own/common/utils/bili_own_storage.dart';
 import 'package:bili_own/common/utils/permission_utils.dart';
+import 'package:bili_own/common/utils/nomedia_utils.dart';
 
 // 下载条目和路径信息
 class DownloadEntryAndPathInfo {
@@ -36,11 +37,14 @@ class DownloadService extends GetxController implements DownloadCallback {
   DownloadManager? _audioDownloadManager;
   int _currentTaskId = 1;
   int _idCounter = 1;
+  bool _isPaused = false; // 添加暂停状态标志
 
   @override
   void onInit() {
     super.onInit();
     _readDownloadList();
+    // 为所有现有的下载目录添加.noMedia文件
+    NoMediaUtils.addNoMediaToAllDownloadDirs();
   }
 
   // 读取下载列表
@@ -431,6 +435,14 @@ class DownloadService extends GetxController implements DownloadCallback {
     final downloadDir = Directory("/storage/emulated/0/Download/Biliown");
     if (!downloadDir.existsSync()) {
       downloadDir.createSync(recursive: true);
+      // 创建.noMedia文件以防止媒体扫描器扫描该目录
+      File(path.join(downloadDir.path, ".nomedia")).createSync();
+    } else {
+      // 确保.noMedia文件存在
+      final noMediaFile = File(path.join(downloadDir.path, ".nomedia"));
+      if (!noMediaFile.existsSync()) {
+        noMediaFile.createSync();
+      }
     }
     return downloadDir.path;
   }
@@ -454,11 +466,27 @@ class DownloadService extends GetxController implements DownloadCallback {
     final downloadDir = Directory(path.join(downloadPath, dirName));
     if (!downloadDir.existsSync()) {
       downloadDir.createSync(recursive: true);
+      // 创建.noMedia文件以防止媒体扫描器扫描该目录
+      File(path.join(downloadDir.path, ".nomedia")).createSync();
+    } else {
+      // 确保.noMedia文件存在
+      final noMediaFile = File(path.join(downloadDir.path, ".nomedia"));
+      if (!noMediaFile.existsSync()) {
+        noMediaFile.createSync();
+      }
     }
 
     final pageDir = Directory(path.join(downloadDir.path, pageDirName));
     if (!pageDir.existsSync()) {
       pageDir.createSync(recursive: true);
+      // 创建.noMedia文件以防止媒体扫描器扫描该目录
+      File(path.join(pageDir.path, ".nomedia")).createSync();
+    } else {
+      // 确保.noMedia文件存在
+      final noMediaFile = File(path.join(pageDir.path, ".nomedia"));
+      if (!noMediaFile.existsSync()) {
+        noMediaFile.createSync();
+      }
     }
 
     return pageDir;
@@ -494,6 +522,57 @@ class DownloadService extends GetxController implements DownloadCallback {
     curDownload.value = info.copyWith(
       status: CurrentDownloadInfo.STATUS_FAIL_DOWNLOAD
     );
+  }
+
+  // 暂停下载
+  void pauseDownload() {
+    if (_downloadManager != null && !_isPaused) {
+      _downloadManager!.cancel(); // 使用现有的cancel方法暂停下载
+      _isPaused = true;
+      // 更新状态为暂停
+      if (curDownload.value != null) {
+        curDownload.value = curDownload.value!.copyWith(
+          status: CurrentDownloadInfo.STATUS_FAIL_DOWNLOAD, // 使用失败状态表示暂停
+        );
+      }
+    }
+  }
+
+  // 恢复下载
+  void resumeDownload() {
+    if (_isPaused && curDownload.value != null) {
+      _isPaused = false;
+      // 重新开始当前下载任务
+      final currentEntry = downloadList.firstWhereOrNull(
+        (element) => curDownload.value!.id == element.entry.key
+      );
+      if (currentEntry != null) {
+        startDownload(currentEntry);
+      }
+    }
+  }
+
+  // 取消下载
+  void cancelDownload() {
+    _isPaused = false;
+    if (_downloadManager != null) {
+      _downloadManager!.cancel();
+    }
+    if (_audioDownloadManager != null) {
+      _audioDownloadManager!.cancel();
+    }
+    curDownload.value = null;
+    _downloadManager = null;
+    _audioDownloadManager = null;
+    _nextDownload();
+  }
+  
+  // 获取当前下载进度（0.0 - 1.0）
+  double getCurrentProgress() {
+    if (_downloadManager != null) {
+      return _downloadManager!.getCurrentProgress();
+    }
+    return 0.0;
   }
 }
 

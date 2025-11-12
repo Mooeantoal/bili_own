@@ -133,11 +133,15 @@ class DownloadManager {
     // 创建下载目录 - 使用指定的Android下载目录
     final String downloadDir = "/storage/emulated/0/Download/Biliown";
     await Directory(downloadDir).create(recursive: true);
-
+    // 创建.noMedia文件以防止媒体扫描器扫描该目录
+    File(path.join(downloadDir, ".nomedia")).createSync();
+    
     // 更新下载信息
     final String taskId = entryInfo.taskId;
     final String videoDir = path.join(downloadDir, taskId);
     await Directory(videoDir).create(recursive: true);
+    // 创建.noMedia文件以防止媒体扫描器扫描该目录
+    File(path.join(videoDir, ".nomedia")).createSync();
 
     // 下载所有媒体文件
     for (var mediaFile in mediaFiles) {
@@ -152,7 +156,7 @@ class DownloadManager {
     CurrentDownloadInfo currentDownloadInfo,
   ) async {
     final String taskId = mediaFile.taskId;
-    final String fileName = '$taskId.mp4';
+    final String fileName = mediaFile.taskId.contains('_audio') ? 'audio.m4s' : 'video.m4s';
     final String savePath = path.join(saveDir, fileName);
     final File file = File(savePath);
 
@@ -262,5 +266,13 @@ class DownloadManager {
     if (downloadInfo != null && downloadInfo!.taskId != 0) {
       cancelDownload(downloadInfo!.taskId.toString());
     }
+  }
+  
+  // 获取当前下载进度（0.0 - 1.0）
+  double getCurrentProgress() {
+    if (downloadInfo == null || downloadInfo!.size == 0) {
+      return 0.0;
+    }
+    return downloadInfo!.progress / downloadInfo!.size;
   }
 }
