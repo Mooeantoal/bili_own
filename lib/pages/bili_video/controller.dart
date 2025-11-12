@@ -49,6 +49,9 @@ class BiliVideoController extends GetxController
         animationDuration: const Duration(milliseconds: 200));
     // 使用正确的构造函数
     biliVideoPlayerController = BiliVideoPlayerController(true);
+    // 设置bvid和cid
+    biliVideoPlayerController.bvid = bvid;
+    biliVideoPlayerController.cid = cid;
     biliVideoPlayerPanelController =
         BiliVideoPlayerPanelController(biliVideoPlayerController);
     biliDanmakuController = BiliDanmakuController(biliVideoPlayerController);

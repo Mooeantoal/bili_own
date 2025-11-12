@@ -75,12 +75,6 @@ class BiliVideoPlayerController {
   
   // 添加弹幕控制器属性
   dynamic biliDanmakuController;
-  
-  // 添加videoPlayInfo getter
-  VideoPlayInfo? get videoPlayInfoGetter => videoPlayInfo;
-  
-  // 添加hasError getter
-  bool get hasError => _videoAudioController.state.hasError;
 
   BiliVideoPlayerController(bool autoPlay)
       : _videoAudioController = VideoAudioController(
@@ -121,6 +115,12 @@ class BiliVideoPlayerController {
   
   // 添加audioPlayItem getter
   AudioPlayItem? get audioPlayItem => _audioPlayItem;
+  
+  // 添加videoPlayInfo getter
+  VideoPlayInfo? get videoPlayInfoGetter => videoPlayInfo;
+  
+  // 添加hasError getter
+  bool get hasError => _videoAudioController.state.hasError;
 
   Future<void> initPlayer(BuildContext context, String bvid, int cid) async {
     // 初始化播放器逻辑
