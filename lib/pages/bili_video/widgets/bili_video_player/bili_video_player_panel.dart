@@ -124,7 +124,7 @@ class _BiliVideoPlayerPanelState extends State<BiliVideoPlayerPanel> {
   List<RadioListTile> buildVideoQualityTiles() {
     List<RadioListTile> list = [];
     for (var i
-        in widget.controller._biliVideoPlayerController.videoPlayInfo!.videos) {
+        in widget.controller._biliVideoPlayerController.videoPlayInfoGetter!.videos) {
       list.add(RadioListTile(
         title: Text(i.quality.description),
         subtitle: Text(i.codecs),

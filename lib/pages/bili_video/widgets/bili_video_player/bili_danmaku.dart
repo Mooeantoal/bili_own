@@ -100,9 +100,9 @@ class _BiliDanmakuState extends State<BiliDanmaku> {
     for (int segmentIndex = 1;
         segmentIndex <= widget.controller.segmentCount;
         segmentIndex++) {
-      log(widget.controller.biliVideoPlayerController.cid.toString());
+      log(widget.controller.biliVideoPlayerController.cid?.toString() ?? 'null');
       var response = await DanmakuApi.requestDanmaku(
-          cid: widget.controller.biliVideoPlayerController.cid,
+          cid: widget.controller.biliVideoPlayerController.cid ?? 0,
           segmentIndex: segmentIndex);
       response.elems.sort((a, b) {
         return a.progress - b.progress;

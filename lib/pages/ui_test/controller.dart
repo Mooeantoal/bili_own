@@ -24,9 +24,13 @@ class UiTestController extends GetxController {
 
   List<ListTile> listTiles = [];
   bp.BiliVideoPlayerController biliVideoPlayerController =
-      bp.BiliVideoPlayerController(
-          bvid: BvidAvidUtil.av2Bvid(170001), 
-          cid: 279786);
+      bp.BiliVideoPlayerController(true); // 使用正确的构造函数
+      
+  // 在构造函数后设置bvid和cid
+  late final _initController = () {
+    biliVideoPlayerController.bvid = BvidAvidUtil.av2Bvid(170001);
+    biliVideoPlayerController.cid = 279786;
+  }();
 
   //测试名称,页面对应表
   late Map<String, Widget> _testPages;
@@ -136,8 +140,8 @@ class UiTestController extends GetxController {
       '短信登陆': const PhoneLoginPage(),
       '视频播放测试': Builder(
         builder: (context) => bp.BiliVideoPlayerWidget(
-          bp.BiliVideoPlayerController(bvid: '', cid: 0),
-          heroTagId: 0,
+          bvid: '', // 提供默认的bvid
+          cid: 0, // 提供默认的cid
         ),
       ),
     };

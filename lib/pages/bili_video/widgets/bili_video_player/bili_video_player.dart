@@ -72,6 +72,15 @@ class BiliVideoPlayerController {
   // 添加bvid和cid属性
   String? bvid;
   int? cid;
+  
+  // 添加弹幕控制器属性
+  dynamic biliDanmakuController;
+  
+  // 添加videoPlayInfo getter
+  VideoPlayInfo? get videoPlayInfoGetter => videoPlayInfo;
+  
+  // 添加hasError getter
+  bool get hasError => _videoAudioController.state.hasError;
 
   BiliVideoPlayerController(bool autoPlay)
       : _videoAudioController = VideoAudioController(
@@ -85,8 +94,33 @@ class BiliVideoPlayerController {
   // 添加获取position的getter
   Duration get position => _videoAudioController.state.position;
   
+  // 添加获取duration的getter
+  Duration get duration => _videoAudioController.state.duration;
+  
   // 添加获取speed的getter
   double get speed => _videoAudioController.state.speed;
+  
+  // 添加获取isPlaying的getter
+  bool get isPlaying => _videoAudioController.state.isPlaying;
+  
+  // 添加获取buffered的getter
+  Duration get fartherestBuffered => _videoAudioController.state.buffered;
+  
+  // 添加获取videoAspectRatio的getter
+  double get videoAspectRatio {
+    final width = _videoAudioController.state.width;
+    final height = _videoAudioController.state.height;
+    if (width > 0 && height > 0) {
+      return width / height;
+    }
+    return 16 / 9; // 默认宽高比
+  }
+  
+  // 添加videoPlayItem getter
+  VideoPlayItem? get videoPlayItem => _videoPlayItem;
+  
+  // 添加audioPlayItem getter
+  AudioPlayItem? get audioPlayItem => _audioPlayItem;
 
   Future<void> initPlayer(BuildContext context, String bvid, int cid) async {
     // 初始化播放器逻辑
@@ -186,8 +220,32 @@ class BiliVideoPlayerController {
   }
   
   // 添加setPlaybackSpeed方法
-  Future<void> setPlaybackSpeed(double speed) async {
+  Future<void> setPlayBackSpeed(double speed) async {
     await _videoAudioController.setPlayBackSpeed(speed);
+  }
+  
+  // 添加changeVideoItem方法
+  void changeVideoItem(VideoPlayItem item) {
+    _videoPlayItem = item;
+    _videoAudioController.videoUrl = item.urls.first;
+  }
+  
+  // 添加changeAudioItem方法
+  void changeAudioItem(AudioPlayItem item) {
+    _audioPlayItem = item;
+    _videoAudioController.audioUrl = item.urls.first;
+  }
+  
+  // 添加全屏切换方法
+  void toggleFullScreen() {
+    // 这里可以添加全屏切换的逻辑
+    // 目前留空，因为具体实现可能依赖于外部组件
+  }
+  
+  // 添加reloadWidget方法
+  Future<void> reloadWidget() async {
+    // 重新加载widget的逻辑
+    // 这里可以添加重新加载视频的逻辑
   }
 
   void dispose() {

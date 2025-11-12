@@ -65,10 +65,9 @@ class _VideoPlayerTestContentState extends State<VideoPlayerTestContent> {
     );
 
     // 初始化播放器控制器，使用测试视频
-    _controller = BiliVideoPlayerController(
-      bvid: BvidAvidUtil.av2Bvid(170001), // 测试视频BV号
-      cid: 279786, // 测试视频CID
-    );
+    _controller = BiliVideoPlayerController(true); // 使用正确的构造函数
+    _controller.bvid = BvidAvidUtil.av2Bvid(170001); // 测试视频BV号
+    _controller.cid = 279786; // 测试视频CID
     
     // 设置videoPlayInfo属性
     _controller.videoPlayInfo = testVideoPlayInfo;
@@ -86,13 +85,8 @@ class _VideoPlayerTestContentState extends State<VideoPlayerTestContent> {
       child: AspectRatio(
         aspectRatio: 16 / 9,
         child: BiliVideoPlayerWidget(
-          _controller,
-          heroTagId: 999,
-          buildControllPanel: () {
-            return BiliVideoPlayerPanel(
-              BiliVideoPlayerPanelController(_controller),
-            );
-          },
+          bvid: _controller.bvid ?? BvidAvidUtil.av2Bvid(170001), // 测试视频BV号
+          cid: _controller.cid ?? 279786, // 测试视频CID
         ),
       ),
     );
