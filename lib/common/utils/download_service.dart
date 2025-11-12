@@ -403,8 +403,8 @@ class DownloadService extends GetxController implements DownloadCallback {
 
   // 获取下载路径
   Future<String> _getDownloadPath() async {
-    final appDocDir = await getApplicationSupportDirectory();
-    final downloadDir = Directory(path.join(appDocDir.path, "download"));
+    // 修改为指定的Android下载目录
+    final downloadDir = Directory("/storage/emulated/0/Download/Biliown");
     if (!downloadDir.existsSync()) {
       downloadDir.createSync(recursive: true);
     }
