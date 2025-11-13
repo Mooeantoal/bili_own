@@ -74,6 +74,9 @@ class ApiConstants {
   ///test: https://api.bilibili.com/x/player/playurl?cid=993730189&avid=351273106&fnval=16&fourk=1
   static const String videoPlay = '$apiBase/x/player/playurl';
 
+  ///番剧播放地址
+  static const String bangumiPlayUrl = '$apiBase/pgc/player/api/playurl';
+
   ///视频信息
   ///test: https://api.bilibili.com/x/web-interface/view?aid=170001
   static const String videoInfo = '$apiBase/x/web-interface/view';
@@ -124,8 +127,20 @@ class ApiConstants {
   ///评论的回复
   static const String replyReply = "$apiBase/x/v2/reply/reply";
 
+  ///评论点赞
+  static const String replyAction = "$apiBase/x/v2/reply/action";
+
+  ///添加评论
+  static const String replyAdd = "$apiBase/x/v2/reply/add";
+
+  ///删除评论
+  static const String replyDel = "$apiBase/x/v2/reply/del";
+
   ///弹幕
   static const String danmaku = "$apiBase/x/v2/dm/web/seg.so";
+
+  ///发送弹幕
+  static const String sendDanmaku = "$apiBase/x/v2/dm/post";
 
   ///番剧/剧集
   static const String bangumiInfo = "$apiBase/pgc/view/web/season";
@@ -158,9 +173,6 @@ class ApiConstants {
 
   ///分享视频
   static const String share = "$apiBase/x/web-interface/share/add";
-
-  ///评论点赞
-  static const String replyAddLike = "$apiBase/x/v2/reply/action";
 
   ///上报历史记录
   static const String heartBeat = "$apiBase/x/click-interface/web/heartbeat";

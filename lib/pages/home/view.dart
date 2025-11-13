@@ -1,6 +1,7 @@
 import 'package:bili_own/common/widget/cached_network_image.dart';
 import 'package:bili_own/pages/recommend/controller.dart';
 import 'package:bili_own/pages/search_input/index.dart';
+import 'package:bili_own/pages/test_video/view.dart';
 import 'package:bili_own/pages/ui_test/index.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -70,6 +71,13 @@ class _HomePageState extends State<HomePage>
             return MapEntry(index, const Center(child: Text("该功能暂无")));
           }
         }).values.toList(),
+      ),
+      // 添加浮动按钮访问测试页面
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          Get.to(() => const TestVideoPage());
+        },
+        child: const Icon(Icons.bug_report),
       ),
     );
   }
