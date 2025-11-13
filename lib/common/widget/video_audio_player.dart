@@ -254,10 +254,19 @@ class VideoAudioController {
     }
 
     //打开当前链接
-    await videoPlayer.open(Media(videoUrl), play: false);
+    // 只有当videoUrl不为空时才打开视频播放器
+    if (videoUrl.isNotEmpty) {
+      log("打开视频播放器，URL: $videoUrl");
+      await videoPlayer.open(Media(videoUrl), play: false);
+    } else {
+      log("视频URL为空，不打开视频播放器");
+    }
     // 只有当audioUrl不为空时才打开音频播放器
     if (audioUrl.isNotEmpty) {
+      log("打开音频播放器，URL: $audioUrl");
       await audioPlayer.open(Media(audioUrl), play: false);
+    } else {
+      log("音频URL为空，不打开音频播放器");
     }
     
     // 视频缓冲监听

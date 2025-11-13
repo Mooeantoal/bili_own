@@ -15,6 +15,7 @@ class PlayerApi {
     int fnval = 4048, // 4048: dash
   }) async {
     try {
+      print("请求视频播放地址: bvid=$bvid, cid=$cid, quality=$quality, fnval=$fnval");
       var response = await HttpUtils().get(
         ApiConstants.videoPlay,
         queryParameters: {
@@ -35,10 +36,24 @@ class PlayerApi {
           },
         ),
       );
-
+      print("视频播放地址响应状态码: ${response.statusCode}");
+      
+      // 检查响应数据是否为空
+      if (response.data == null) {
+        print("视频播放地址响应数据为空");
+        throw Exception("视频播放地址响应数据为空");
+      }
+      
+      // 检查响应数据格式是否正确
+      if (response.data is! Map<String, dynamic>) {
+        print("视频播放地址响应数据格式不正确: ${response.data.runtimeType}");
+        throw Exception("视频播放地址响应数据格式不正确");
+      }
+      
       return VideoPlayResponse.fromJson(response.data);
-    } catch (e) {
+    } catch (e, stackTrace) {
       print("获取视频播放地址失败: $e");
+      print("错误堆栈: $stackTrace");
       rethrow;
     }
   }

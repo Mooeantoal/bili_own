@@ -27,6 +27,13 @@ class RecommendController extends GetxController {
         .get(SettingsStorageKeys.recommendColumnCount, defaultValue: 2);
     super.onInit();
   }
+  
+  @override
+  void onReady() {
+    super.onReady();
+    // 初始化时加载推荐视频
+    _addRecommendItems();
+  }
 
   void animateToTop() {
     scrollController.animateTo(0,
@@ -36,10 +43,14 @@ class RecommendController extends GetxController {
 //加载并追加视频推荐
   Future<bool> _addRecommendItems() async {
     try {
-      recommendItems.addAll(await HomeApi.getRecommendVideoItems(
-          num: 16, refreshIdx: refreshIdx));
-    } catch (e) {
+      log("开始加载推荐视频，refreshIdx: $refreshIdx");
+      var items = await HomeApi.getRecommendVideoItems(
+          num: 16, refreshIdx: refreshIdx);
+      recommendItems.addAll(items);
+      log("成功加载 ${items.length} 个推荐视频，总共有 ${recommendItems.length} 个视频");
+    } catch (e, stackTrace) {
       log("加载推荐视频失败:${e.toString()}");
+      log("错误堆栈: $stackTrace");
       return false;
     }
     refreshIdx += 1;
@@ -47,6 +58,7 @@ class RecommendController extends GetxController {
   }
 
   Future<void> onRefresh() async {
+    log("刷新推荐视频");
     recommendItems.clear();
     await cacheManager.emptyCache();
     if (await _addRecommendItems()) {
@@ -57,6 +69,7 @@ class RecommendController extends GetxController {
   }
 
   Future<void> onLoad() async {
+    log("加载更多推荐视频");
     if (await _addRecommendItems()) {
       refreshController.finishLoad(IndicatorResult.success);
       refreshController.resetFooter();

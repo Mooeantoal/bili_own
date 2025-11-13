@@ -36,7 +36,7 @@ class _TestVideoPlayerWidgetState extends State<TestVideoPlayerWidget> {
   void initState() {
     super.initState();
     _controller = TestVideoPlayerController(widget.autoPlay);
-    _controller.initPlayer(widget.bvid, widget.cid);
+    // 在initState中不调用initPlayer，而是在FutureBuilder中处理
   }
 
   @override
@@ -46,8 +46,38 @@ class _TestVideoPlayerWidgetState extends State<TestVideoPlayerWidget> {
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const Center(child: CircularProgressIndicator());
-        } else if (snapshot.hasError || !(snapshot.data ?? false)) {
-          return const Center(child: Text('加载视频失败'));
+        } else if (snapshot.hasError) {
+          return Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text('加载视频失败: ${snapshot.error}'),
+                ElevatedButton(
+                  onPressed: () {
+                    // 重新加载
+                    setState(() {});
+                  },
+                  child: const Text('重新加载'),
+                ),
+              ],
+            ),
+          );
+        } else if (!(snapshot.data ?? false)) {
+          return Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const Text('加载视频失败'),
+                ElevatedButton(
+                  onPressed: () {
+                    // 重新加载
+                    setState(() {});
+                  },
+                  child: const Text('重新加载'),
+                ),
+              ],
+            ),
+          );
         } else {
           return AspectRatio(
             aspectRatio: widget.aspectRatio,
@@ -142,113 +172,120 @@ class TestVideoPlayerController {
     this.bvid = bvid;
     this.cid = cid;
     
-    if (videoPlayInfo == null) {
-      try {
-        //加载视频播放信息
-        var response = await PlayerApi.getVideoPlayUrl(bvid: bvid, cid: cid);
-        if (response.code != 0) {
-          log("获取视频播放信息失败: code=${response.code}, message=${response.message}");
-          return false;
-        }
-        
-        // 转换为VideoPlayInfo对象
-        // 获取支持的视频质量
-        List<VideoQuality> supportVideoQualities = [];
-        for (var i in response.data?.acceptQuality ?? <int>[]) {
-          supportVideoQualities.add(VideoQualityCode.fromCode(i));
-        }
-        
-        // 获取视频
-        List<VideoPlayItem> videos = [];
-        for (var i in response.data?.dash?.video ?? <VideoOrAudioRaw>[]) {
-          List<String> urls = [];
-          if (i.baseUrl != null) {
-            urls.add(i.baseUrl!);
-          }
-          if (i.backupUrl != null) {
-            urls.addAll(i.backupUrl!);
-          }
-          videos.add(VideoPlayItem(
-              urls: urls,
-              quality: VideoQualityCode.fromCode(i.id ?? -1),
-              bandWidth: i.bandwidth ?? 0,
-              codecs: i.codecs ?? "",
-              width: i.width ?? 0,
-              height: i.height ?? 0,
-              frameRate: double.tryParse(i.frameRate ?? "0") ?? 0));
-        }
-        
-        // 获取音频
-        List<AudioPlayItem> audios = [];
-        for (var i in response.data?.dash?.audio ?? <VideoOrAudioRaw>[]) {
-          List<String> urls = [];
-          if (i.baseUrl != null) {
-            urls.add(i.baseUrl!);
-          }
-          if (i.backupUrl != null) {
-            urls.addAll(i.backupUrl!);
-          }
-          audios.add(AudioPlayItem(
-              urls: urls,
-              quality: AudioQualityCode.fromCode(i.id ?? -1),
-              bandWidth: i.bandwidth ?? 0,
-              codecs: i.codecs ?? ""));
-        }
-        
-        // 如果有dolby的话
-        for (var i in response.data?.dash?.dolby?.audio ?? <VideoOrAudioRaw>[]) {
-          List<String> urls = [];
-          if (i.baseUrl != null) {
-            urls.add(i.baseUrl!);
-          }
-          if (i.backupUrl != null) {
-            urls.addAll(i.backupUrl!);
-          }
-          audios.add(AudioPlayItem(
-              urls: urls,
-              quality: AudioQualityCode.fromCode(i.id ?? -1),
-              bandWidth: i.bandwidth ?? 0,
-              codecs: i.codecs ?? ""));
-        }
-        
-        // 如果有flac的话
-        List<String> flacUrls = [];
-        if (response.data?.dash?.flac?.audio?.baseUrl != null) {
-          flacUrls.add(response.data!.dash!.flac!.audio!.baseUrl!);
-        }
-        if (response.data?.dash?.flac?.audio?.backupUrl != null) {
-          flacUrls.addAll(response.data!.dash!.flac!.audio!.backupUrl!);
-        }
-        
-        List<AudioQuality> supportAudioQualities = [];
-        // 获取支持的音质
-        for (var i in audios) {
-          supportAudioQualities.add(i.quality);
-        }
-        
-        videoPlayInfo = VideoPlayInfo(
-            supportVideoQualities: supportVideoQualities,
-            supportAudioQualities: supportAudioQualities,
-            timeLength: response.data?.dash?.duration ?? 0,
-            videos: videos,
-            audios: audios,
-            lastPlayCid: response.data?.lastPlayCid ?? 0,
-            lastPlayTime: Duration(milliseconds: response.data?.lastPlayTime ?? 0));
-            
-        log("获取到视频播放信息: videos=${videoPlayInfo?.videos.length}, audios=${videoPlayInfo?.audios.length}");
-      } catch (e, stackTrace) {
-        log("bili_video_player.loadVideo:$e");
-        log("错误堆栈: $stackTrace");
+    try {
+      //加载视频播放信息
+      log("开始请求视频播放信息");
+      var response = await PlayerApi.getVideoPlayUrl(bvid: bvid, cid: cid);
+      log("获取视频播放信息响应: code=${response.code}, message=${response.message}");
+      
+      if (response.code != 0) {
+        log("获取视频播放信息失败: code=${response.code}, message=${response.message}");
         return false;
       }
-    }
-    
-    if (videoPlayInfo == null || videoPlayInfo!.videos.isEmpty) {
-      log("bili_video_player.loadVideo: videoPlayInfo is null or videos is empty");
+      
+      // 检查响应数据是否为空
+      if (response.data == null) {
+        log("视频播放数据为空");
+        return false;
+      }
+      
+      // 转换为VideoPlayInfo对象
+      // 获取支持的视频质量
+      List<VideoQuality> supportVideoQualities = [];
+      for (var i in response.data?.acceptQuality ?? <int>[]) {
+        supportVideoQualities.add(VideoQualityCode.fromCode(i));
+      }
+      
+      // 获取视频
+      List<VideoPlayItem> videos = [];
+      for (var i in response.data?.dash?.video ?? <VideoOrAudioRaw>[]) {
+        List<String> urls = [];
+        if (i.baseUrl != null) {
+          urls.add(i.baseUrl!);
+        }
+        if (i.backupUrl != null) {
+          urls.addAll(i.backupUrl!);
+        }
+        videos.add(VideoPlayItem(
+            urls: urls,
+            quality: VideoQualityCode.fromCode(i.id ?? -1),
+            bandWidth: i.bandwidth ?? 0,
+            codecs: i.codecs ?? "",
+            width: i.width ?? 0,
+            height: i.height ?? 0,
+            frameRate: double.tryParse(i.frameRate ?? "0") ?? 0));
+      }
+      
+      // 获取音频
+      List<AudioPlayItem> audios = [];
+      for (var i in response.data?.dash?.audio ?? <VideoOrAudioRaw>[]) {
+        List<String> urls = [];
+        if (i.baseUrl != null) {
+          urls.add(i.baseUrl!);
+        }
+        if (i.backupUrl != null) {
+          urls.addAll(i.backupUrl!);
+        }
+        audios.add(AudioPlayItem(
+            urls: urls,
+            quality: AudioQualityCode.fromCode(i.id ?? -1),
+            bandWidth: i.bandwidth ?? 0,
+            codecs: i.codecs ?? ""));
+      }
+      
+      // 如果有dolby的话
+      for (var i in response.data?.dash?.dolby?.audio ?? <VideoOrAudioRaw>[]) {
+        List<String> urls = [];
+        if (i.baseUrl != null) {
+          urls.add(i.baseUrl!);
+        }
+        if (i.backupUrl != null) {
+          urls.addAll(i.backupUrl!);
+        }
+        audios.add(AudioPlayItem(
+            urls: urls,
+            quality: AudioQualityCode.fromCode(i.id ?? -1),
+            bandWidth: i.bandwidth ?? 0,
+            codecs: i.codecs ?? ""));
+      }
+      
+      // 如果有flac的话
+      List<String> flacUrls = [];
+      if (response.data?.dash?.flac?.audio?.baseUrl != null) {
+        flacUrls.add(response.data!.dash!.flac!.audio!.baseUrl!);
+      }
+      if (response.data?.dash?.flac?.audio?.backupUrl != null) {
+        flacUrls.addAll(response.data!.dash!.flac!.audio!.backupUrl!);
+      }
+      
+      List<AudioQuality> supportAudioQualities = [];
+      // 获取支持的音质
+      for (var i in audios) {
+        supportAudioQualities.add(i.quality);
+      }
+      
+      videoPlayInfo = VideoPlayInfo(
+          supportVideoQualities: supportVideoQualities,
+          supportAudioQualities: supportAudioQualities,
+          timeLength: response.data?.dash?.duration ?? 0,
+          videos: videos,
+          audios: audios,
+          lastPlayCid: response.data?.lastPlayCid ?? 0,
+          lastPlayTime: Duration(milliseconds: response.data?.lastPlayTime ?? 0));
+          
+      log("获取到视频播放信息: videos=${videoPlayInfo?.videos.length}, audios=${videoPlayInfo?.audios.length}");
+    } catch (e, stackTrace) {
+      log("bili_video_player.loadVideo:$e");
+      log("错误堆栈: $stackTrace");
       return false;
     }
     
-    if (_videoPlayItem == null) {
+    if (videoPlayInfo == null || (videoPlayInfo!.videos.isEmpty && videoPlayInfo!.audios.isEmpty)) {
+      log("bili_video_player.loadVideo: videoPlayInfo is null or both videos and audios are empty");
+      return false;
+    }
+    
+    if (_videoPlayItem == null && videoPlayInfo!.videos.isNotEmpty) {
       // 根据偏好选择画质
       List<VideoPlayItem> tempMatchVideos = [];
       // 先匹配编码
@@ -279,6 +316,12 @@ class TestVideoPlayerController {
     _videoAudioController.videoUrl = videoUrl;
     _videoAudioController.audioUrl = audioUrl;
     
+    log("设置视频URL: $videoUrl");
+    log("设置音频URL: $audioUrl");
+    
+    // 刷新播放器
+    await _videoAudioController.refresh();
+    
     return true;
   }
 
@@ -306,12 +349,16 @@ class TestVideoPlayerController {
   void changeVideoItem(VideoPlayItem item) {
     _videoPlayItem = item;
     _videoAudioController.videoUrl = item.urls.first;
+    // 刷新播放器以应用新的视频URL
+    _videoAudioController.refresh();
   }
   
   // 添加changeAudioItem方法
   void changeAudioItem(AudioPlayItem item) {
     _audioPlayItem = item;
     _videoAudioController.audioUrl = item.urls.first;
+    // 刷新播放器以应用新的音频URL
+    _videoAudioController.refresh();
   }
   
   // 添加全屏切换方法
@@ -324,6 +371,9 @@ class TestVideoPlayerController {
   Future<void> reloadWidget() async {
     // 重新加载widget的逻辑
     // 这里可以添加重新加载视频的逻辑
+    if (bvid != null && cid != null) {
+      await loadVideoInfo(bvid!, cid!);
+    }
   }
 
   void dispose() {
