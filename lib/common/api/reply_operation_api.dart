@@ -11,7 +11,7 @@ class ReplyOperationApi {
       required int rpid,
       required bool likeOrUnlike}) async {
     var response =
-        await HttpUtils().post(ApiConstants.replyAddLike, queryParameters: {
+        await HttpUtils().post(ApiConstants.replyAction, queryParameters: {
       'type': type.code,
       'oid': oid,
       'rpid': rpid,
