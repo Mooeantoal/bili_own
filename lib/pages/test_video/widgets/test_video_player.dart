@@ -75,6 +75,26 @@ class TestVideoPlayerController {
   String? bvid;
   int? cid;
   
+  // 播放器状态
+  bool _isLocked = false;
+  bool get isLocked => _isLocked;
+  
+  // 播放速度
+  double _playSpeed = 1.0;
+  double get playSpeed => _playSpeed;
+  
+  // 音频焦点
+  bool _enabledAudioFocus = true;
+  bool get enabledAudioFocus => _enabledAudioFocus;
+  
+  // 弹幕开关
+  bool _showDanmaku = true;
+  bool get showDanmaku => _showDanmaku;
+  
+  // 字幕开关
+  bool _showSubtitle = false;
+  bool get showSubtitle => _showSubtitle;
+  
   TestVideoPlayerController(bool autoPlay)
       : _videoAudioController = VideoAudioController(
           autoWakelock: true,
@@ -338,5 +358,87 @@ class TestVideoPlayerController {
   // 添加removeSeekToListener方法
   void removeSeekToListener(Function(Duration) listener) {
     _videoAudioController.removeSeekToListener(listener);
+  }
+  
+  // 锁定/解锁播放器
+  void toggleLock() {
+    _isLocked = !_isLocked;
+  }
+  
+  // 设置播放速度
+  Future<void> setPlaySpeed(double speed) async {
+    _playSpeed = speed;
+    await _videoAudioController.setPlayBackSpeed(speed);
+  }
+  
+  // 切换弹幕显示
+  void toggleDanmaku() {
+    _showDanmaku = !_showDanmaku;
+  }
+  
+  // 切换字幕显示
+  void toggleSubtitle() {
+    _showSubtitle = !_showSubtitle;
+  }
+  
+  // 音频焦点控制
+  void setEnabledAudioFocus(bool enabled) {
+    _enabledAudioFocus = enabled;
+  }
+  
+  // 长按倍速播放
+  Future<void> startLongPressSpeedPlay() async {
+    _playSpeed *= 2;
+    await _videoAudioController.setPlayBackSpeed(_playSpeed);
+  }
+  
+  Future<void> stopLongPressSpeedPlay() async {
+    _playSpeed /= 2;
+    await _videoAudioController.setPlayBackSpeed(_playSpeed);
+  }
+  
+  // 添加更多播放器控制方法，模仿bilimiao项目的功能
+  Future<void> setVideoQuality(VideoQuality quality) async {
+    // 根据质量选择视频
+    final video = videoPlayInfo?.videos.firstWhere(
+      (element) => element.quality == quality,
+      orElse: () => videoPlayInfo!.videos.first,
+    );
+    
+    if (video != null) {
+      changeVideoItem(video);
+    }
+  }
+  
+  Future<void> setAudioQuality(AudioQuality quality) async {
+    // 根据质量选择音频
+    final audio = videoPlayInfo?.audios.firstWhere(
+      (element) => element.quality == quality,
+      orElse: () => videoPlayInfo!.audios.first,
+    );
+    
+    if (audio != null) {
+      changeAudioItem(audio);
+    }
+  }
+  
+  // 获取支持的视频质量列表
+  List<VideoQuality> getSupportVideoQualities() {
+    return videoPlayInfo?.supportVideoQualities ?? [];
+  }
+  
+  // 获取支持的音频质量列表
+  List<AudioQuality> getSupportAudioQualities() {
+    return videoPlayInfo?.supportAudioQualities ?? [];
+  }
+  
+  // 获取当前视频质量
+  VideoQuality? getCurrentVideoQuality() {
+    return _videoPlayItem?.quality;
+  }
+  
+  // 获取当前音频质量
+  AudioQuality? getCurrentAudioQuality() {
+    return _audioPlayItem?.quality;
   }
 }

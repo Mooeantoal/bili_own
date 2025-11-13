@@ -131,10 +131,50 @@ class TestDanmakuController {
 
   bool _isDanmakuOpened = true;
   bool get isDanmakuOpened => _isDanmakuOpened;
+  
+  // 弹幕透明度
+  double _danmakuOpacity = 1.0;
+  double get danmakuOpacity => _danmakuOpacity;
+  
+  // 弹幕大小
+  double _danmakuSize = 1.0;
+  double get danmakuSize => _danmakuSize;
+  
+  // 弹幕区域
+  double _danmakuArea = 1.0;
+  double get danmakuArea => _danmakuArea;
+  
+  // 弹幕速度
+  double _danmakuSpeed = 1.0;
+  double get danmakuSpeed => _danmakuSpeed;
 
   void toggleDanmaku() {
     _isDanmakuOpened = !_isDanmakuOpened;
     clearAllDanmaku?.call();
+  }
+  
+  // 设置弹幕透明度
+  void setDanmakuOpacity(double opacity) {
+    _danmakuOpacity = opacity;
+    // TODO: 更新弹幕透明度
+  }
+  
+  // 设置弹幕大小
+  void setDanmakuSize(double size) {
+    _danmakuSize = size;
+    // TODO: 更新弹幕大小
+  }
+  
+  // 设置弹幕区域
+  void setDanmakuArea(double area) {
+    _danmakuArea = area;
+    // TODO: 更新弹幕区域
+  }
+  
+  // 设置弹幕速度
+  void setDanmakuSpeed(double speed) {
+    _danmakuSpeed = speed;
+    // TODO: 更新弹幕速度
   }
   
   // 添加弹幕项
@@ -168,5 +208,81 @@ class TestDanmakuController {
     } catch (e) {
       log("加载弹幕失败: $e");
     }
+  }
+  
+  // 暂停弹幕
+  void pauseDanmaku() {
+    // TODO: 实现暂停弹幕逻辑
+  }
+  
+  // 恢复弹幕
+  void resumeDanmaku() {
+    // TODO: 实现恢复弹幕逻辑
+  }
+  
+  // 清除所有弹幕
+  void clearAllDanmakuItems() {
+    clearAllDanmaku?.call();
+  }
+  
+  // 添加更多弹幕控制方法，模仿bilimiao项目的功能
+  // 设置弹幕颜色
+  void setDanmakuColor(Color color) {
+    // TODO: 实现弹幕颜色设置
+  }
+  
+  // 设置弹幕类型
+  void setDanmakuType(int type) {
+    // TODO: 实现弹幕类型设置
+  }
+  
+  // 获取弹幕颜色列表
+  List<Color> getDanmakuColors() {
+    return [
+      Colors.white,
+      Colors.red,
+      Colors.blue,
+      Colors.green,
+      Colors.yellow,
+      Colors.purple,
+    ];
+  }
+  
+  // 获取弹幕类型列表
+  List<String> getDanmakuTypes() {
+    return [
+      "滚动",
+      "顶部",
+      "底部",
+    ];
+  }
+  
+  // 根据字符串获取弹幕类型
+  int getDanmakuTypeFromString(String type) {
+    switch (type) {
+      case "顶部":
+        return 5; // 顶部弹幕
+      case "底部":
+        return 4; // 底部弹幕
+      default:
+        return 1; // 滚动弹幕
+    }
+  }
+  
+  // 发送弹幕
+  Future<void> sendDanmaku(String text, Color color, int type) async {
+    // TODO: 实现弹幕发送逻辑
+    // 这里可以调用API发送弹幕到服务器
+  }
+  
+  // 获取弹幕开关状态
+  bool getDanmakuSwitchStatus() {
+    return _isDanmakuOpened;
+  }
+  
+  // 设置弹幕开关状态
+  void setDanmakuSwitchStatus(bool status) {
+    _isDanmakuOpened = status;
+    clearAllDanmaku?.call();
   }
 }
