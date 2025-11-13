@@ -4,6 +4,7 @@ import 'package:bili_own/common/widget/bili_url_scheme.dart';
 import 'package:bili_own/pages/dynamic/view.dart';
 import 'package:bili_own/pages/home/index.dart';
 import 'package:bili_own/pages/recommend/controller.dart';
+import 'package:bili_own/pages/test_video/view.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -69,6 +70,16 @@ class _MainPageState extends State<MainPage> {
             index: controller.selectedIndex.value,
             children: controller.pages,
           ),
+          // 只在首页显示浮动按钮
+          floatingActionButton: controller.selectedIndex.value == 0
+              ? FloatingActionButton(
+                  onPressed: () {
+                    // 导航到测试页面
+                    Get.to(() => const TestVideoPage());
+                  },
+                  child: const Icon(Icons.bug_report),
+                )
+              : null,
           bottomNavigationBar: NavigationBar(
             height: 64,
             destinations: const [
