@@ -201,6 +201,13 @@ class BiliVideoPlayerController {
     _videoAudioController.videoUrl = videoUrl;
     _videoAudioController.audioUrl = audioUrl;
     
+    // 设置视频时长
+    if (videoPlayInfo != null && videoPlayInfo!.timeLength > 0) {
+      Duration duration = Duration(seconds: videoPlayInfo!.timeLength);
+      _videoAudioController.state.duration = duration;
+      log("设置视频时长: $duration");
+    }
+    
     return true;
   }
 

@@ -244,7 +244,12 @@ class TestVideoPlayerController {
         appLog("设置音频URL: ${_audioPlayItem!.urls.first}");
       }
       
-      // 设置视频时长（在刷新播放器之前设置）
+      // 刷新播放器
+      appLog("开始刷新播放器");
+      await _videoAudioController.refresh();
+      appLog("播放器刷新完成");
+      
+      // 设置视频时长（在刷新播放器之后设置，避免被重置）
       Duration savedDuration = Duration.zero;
       if (videoPlayInfo != null && videoPlayInfo.timeLength > 0) {
         savedDuration = Duration(seconds: videoPlayInfo.timeLength);
@@ -252,19 +257,6 @@ class TestVideoPlayerController {
         appLog("设置视频时长: ${_videoAudioController.state.duration}");
       } else {
         appLog("视频时长信息不可用或为零");
-      }
-      
-      // 刷新播放器
-      appLog("开始刷新播放器");
-      await _videoAudioController.refresh();
-      appLog("播放器刷新完成");
-      
-      // 如果播放器没有正确设置duration，使用我们手动设置的值
-      appLog("检查播放器时长设置: 当前时长=${_videoAudioController.state.duration.inMilliseconds}ms, 保存的时长=${savedDuration.inMilliseconds}ms");
-      if (_videoAudioController.state.duration.inMilliseconds == 0 && 
-          savedDuration.inMilliseconds > 0) {
-        _videoAudioController.state.duration = savedDuration;
-        appLog("重新设置视频时长: ${_videoAudioController.state.duration}");
       }
       
       appLog("视频信息加载完成");
