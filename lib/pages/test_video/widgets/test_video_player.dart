@@ -1,10 +1,10 @@
 // 测试视频播放器组件，用于移植bilimiao项目的播放器功能
 import 'dart:async';
-import 'dart:developer';
+import 'package:bili_own/common/utils/log_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:media_kit/media_kit.dart';
 import 'package:media_kit_video/media_kit_video.dart';
-import 'package:bili_own/common/api/player_api.dart';
+import 'package:bili_own/common/api/video_play_api.dart';
 import 'package:bili_own/common/models/local/video/video_play_info.dart';
 import 'package:bili_own/common/models/local/video/video_play_item.dart';
 import 'package:bili_own/common/models/local/video/audio_play_item.dart';
@@ -36,8 +36,10 @@ class _TestVideoPlayerWidgetState extends State<TestVideoPlayerWidget> {
   @override
   void initState() {
     super.initState();
+    appLog("初始化TestVideoPlayerWidget");
     _controller = TestVideoPlayerController(widget.autoPlay);
-    // 初始化Future，避免重复调用
+    // 添加测试日志
+    appLog("TestVideoPlayerWidget初始化完成");
     _loadVideoFuture = _controller.loadVideoInfo(widget.bvid, widget.cid);
   }
 
@@ -135,7 +137,9 @@ class TestVideoPlayerController {
       : _videoAudioController = VideoAudioController(
           autoWakelock: true,
           initStart: autoPlay,
-        );
+        ) {
+    appLog("初始化TestVideoPlayerController, autoPlay=$autoPlay");
+  }
 
   String get videoUrl => _videoPlayItem?.urls.first ?? '';
   String get audioUrl => _audioPlayItem?.urls.first ?? '';
@@ -174,186 +178,102 @@ class TestVideoPlayerController {
   }
 
   Future<bool> loadVideoInfo(String bvid, int cid) async {
-    log("加载视频信息: bvid=$bvid, cid=$cid");
-    this.bvid = bvid;
-    this.cid = cid;
-    
+    appLog("开始加载视频信息: bvid=$bvid, cid=$cid");
     try {
-      //加载视频播放信息
-      log("开始请求视频播放信息");
-      var response = await PlayerApi.getVideoPlayUrl(bvid: bvid, cid: cid);
-      log("获取视频播放信息响应: code=${response.code}, message=${response.message}");
+      // 添加测试日志
+      appLog("调用VideoPlayApi.getVideoPlay获取视频播放信息");
+      final VideoPlayInfo videoPlayInfo = await VideoPlayApi.getVideoPlay(bvid: bvid, cid: cid);
+      appLog("成功获取视频播放信息: ${videoPlayInfo.lastPlayTime.inSeconds}秒");
       
-      if (response.code != 0) {
-        log("获取视频播放信息失败: code=${response.code}, message=${response.message}");
+      // 保存视频信息
+      this.videoPlayInfo = videoPlayInfo;
+      
+      // 添加测试日志
+      appLog("VideoPlayInfo创建完成: 视频时长=${videoPlayInfo.timeLength}秒");
+
+      if (videoPlayInfo == null || (videoPlayInfo.videos.isEmpty && videoPlayInfo.audios.isEmpty)) {
+        appLog("bili_video_player.loadVideo: videoPlayInfo is null or both videos and audios are empty");
+        // 添加更详细的日志信息
+        if (videoPlayInfo == null) {
+          appLog("videoPlayInfo为null");
+        } else {
+          appLog("videos长度: ${videoPlayInfo.videos.length}, audios长度: ${videoPlayInfo.audios.length}");
+        }
         return false;
       }
       
-      // 检查响应数据是否为空
-      if (response.data == null) {
-        log("视频播放数据为空");
-        return false;
-      }
-      
-      // 转换为VideoPlayInfo对象
-      // 获取支持的视频质量
-      List<VideoQuality> supportVideoQualities = [];
-      for (var i in response.data?.acceptQuality ?? <int>[]) {
-        supportVideoQualities.add(VideoQualityCode.fromCode(i));
-      }
-      
-      // 获取视频
-      List<VideoPlayItem> videos = [];
-      for (var i in response.data?.dash?.video ?? <VideoOrAudioRaw>[]) {
-        List<String> urls = [];
-        if (i.baseUrl != null) {
-          urls.add(i.baseUrl!);
+      if (_videoPlayItem == null && videoPlayInfo.videos.isNotEmpty) {
+        // 根据偏好选择画质
+        List<VideoPlayItem> tempMatchVideos = [];
+        // 先匹配编码
+        for (var i in videoPlayInfo.videos) {
+          // 简化处理，选择第一个视频
+          tempMatchVideos.add(i);
         }
-        if (i.backupUrl != null) {
-          urls.addAll(i.backupUrl!);
+        
+        if (tempMatchVideos.isNotEmpty) {
+          _videoPlayItem = tempMatchVideos.first;
+          appLog("选择视频画质: quality=${_videoPlayItem?.quality}, codecs=${_videoPlayItem?.codecs}, url=${_videoPlayItem?.urls.first}");
         }
-        videos.add(VideoPlayItem(
-            urls: urls,
-            quality: VideoQualityCode.fromCode(i.id ?? -1),
-            bandWidth: i.bandwidth ?? 0,
-            codecs: i.codecs ?? "",
-            width: i.width ?? 0,
-            height: i.height ?? 0,
-            frameRate: double.tryParse(i.frameRate ?? "0") ?? 0));
-      }
-      
-      // 获取音频
-      List<AudioPlayItem> audios = [];
-      for (var i in response.data?.dash?.audio ?? <VideoOrAudioRaw>[]) {
-        List<String> urls = [];
-        if (i.baseUrl != null) {
-          urls.add(i.baseUrl!);
-        }
-        if (i.backupUrl != null) {
-          urls.addAll(i.backupUrl!);
-        }
-        audios.add(AudioPlayItem(
-            urls: urls,
-            quality: AudioQualityCode.fromCode(i.id ?? -1),
-            bandWidth: i.bandwidth ?? 0,
-            codecs: i.codecs ?? ""));
-      }
-      
-      // 如果有dolby的话
-      for (var i in response.data?.dash?.dolby?.audio ?? <VideoOrAudioRaw>[]) {
-        List<String> urls = [];
-        if (i.baseUrl != null) {
-          urls.add(i.baseUrl!);
-        }
-        if (i.backupUrl != null) {
-          urls.addAll(i.backupUrl!);
-        }
-        audios.add(AudioPlayItem(
-            urls: urls,
-            quality: AudioQualityCode.fromCode(i.id ?? -1),
-            bandWidth: i.bandwidth ?? 0,
-            codecs: i.codecs ?? ""));
-      }
-      
-      // 如果有flac的话
-      List<String> flacUrls = [];
-      if (response.data?.dash?.flac?.audio?.baseUrl != null) {
-        flacUrls.add(response.data!.dash!.flac!.audio!.baseUrl!);
-      }
-      if (response.data?.dash?.flac?.audio?.backupUrl != null) {
-        flacUrls.addAll(response.data!.dash!.flac!.audio!.backupUrl!);
-      }
-      
-      List<AudioQuality> supportAudioQualities = [];
-      // 获取支持的音质
-      for (var i in audios) {
-        supportAudioQualities.add(i.quality);
-      }
-      
-      videoPlayInfo = VideoPlayInfo(
-          supportVideoQualities: supportVideoQualities,
-          supportAudioQualities: supportAudioQualities,
-          timeLength: response.data?.dash?.duration ?? 0,
-          videos: videos,
-          audios: audios,
-          lastPlayCid: response.data?.lastPlayCid ?? 0,
-          lastPlayTime: Duration(milliseconds: response.data?.lastPlayTime ?? 0));
-          
-      log("获取到视频播放信息: videos=${videoPlayInfo?.videos.length}, audios=${videoPlayInfo?.audios.length}, duration=${videoPlayInfo?.timeLength}");
-    } catch (e, stackTrace) {
-      log("bili_video_player.loadVideo:$e");
-      log("错误堆栈: $stackTrace");
-      // 即使出现异常，也要确保返回false
-      return false;
-    }
-    
-    if (videoPlayInfo == null || (videoPlayInfo!.videos.isEmpty && videoPlayInfo!.audios.isEmpty)) {
-      log("bili_video_player.loadVideo: videoPlayInfo is null or both videos and audios are empty");
-      // 添加更详细的日志信息
-      if (videoPlayInfo == null) {
-        log("videoPlayInfo为null");
+      } else if (videoPlayInfo.videos.isEmpty) {
+        _videoPlayItem = null;
+        appLog("没有视频信息");
       } else {
-        log("videos长度: ${videoPlayInfo!.videos.length}, audios长度: ${videoPlayInfo!.audios.length}");
-      }
-      return false;
-    }
-    
-    if (_videoPlayItem == null && videoPlayInfo!.videos.isNotEmpty) {
-      // 根据偏好选择画质
-      List<VideoPlayItem> tempMatchVideos = [];
-      // 先匹配编码
-      for (var i in videoPlayInfo!.videos) {
-        // 简化处理，选择第一个视频
-        tempMatchVideos.add(i);
+        appLog("使用已选择的视频画质: quality=${_videoPlayItem?.quality}");
       }
       
-      // 选择第一个视频作为默认
-      if (tempMatchVideos.isNotEmpty) {
-        _videoPlayItem = tempMatchVideos.first;
-        log("选择视频画质: quality=${_videoPlayItem?.quality}, codecs=${_videoPlayItem?.codecs}, url=${_videoPlayItem?.urls.first}");
+      if (_audioPlayItem == null && videoPlayInfo.audios.isNotEmpty) {
+        // 选择第一个音频作为默认
+        _audioPlayItem = videoPlayInfo.audios.first;
+        appLog("选择音频音质: quality=${_audioPlayItem?.quality}, codecs=${_audioPlayItem?.codecs}, url=${_audioPlayItem?.urls.first}");
+      } else if (videoPlayInfo.audios.isEmpty) {
+        _audioPlayItem = null;
+        appLog("没有音频信息");
+      } else {
+        appLog("使用已选择的音频音质: quality=${_audioPlayItem?.quality}");
       }
-    }
-    
-    if (_audioPlayItem == null && videoPlayInfo!.audios.isNotEmpty) {
-      // 选择第一个音频作为默认
-      _audioPlayItem = videoPlayInfo!.audios.first;
-      log("选择音频音质: quality=${_audioPlayItem?.quality}, codecs=${_audioPlayItem?.codecs}, url=${_audioPlayItem?.urls.first}");
-    } else if (videoPlayInfo!.audios.isEmpty) {
-      _audioPlayItem = null;
-      log("没有音频信息");
-    } else {
-      log("音频信息已存在或不需要重新选择");
-    }
-    
-    // 更新视频音频控制器的URL
-    _videoAudioController.videoUrl = videoUrl;
-    _videoAudioController.audioUrl = audioUrl;
-    
-    log("设置视频URL: $videoUrl");
-    log("设置音频URL: $audioUrl");
-    
-    // 检查URL是否为空
-    if (videoUrl.isEmpty && audioUrl.isEmpty) {
-      log("警告: 视频和音频URL都为空");
+      
+      // 设置播放器URL
+      if (_videoPlayItem != null) {
+        _videoAudioController.videoUrl = _videoPlayItem!.urls.first;
+        appLog("设置视频URL: ${_videoPlayItem!.urls.first}");
+      }
+      
+      if (_audioPlayItem != null) {
+        _videoAudioController.audioUrl = _audioPlayItem!.urls.first;
+        appLog("设置音频URL: ${_audioPlayItem!.urls.first}");
+      }
+      
+      // 设置视频时长（在刷新播放器之前设置）
+      Duration savedDuration = Duration.zero;
+      if (videoPlayInfo != null && videoPlayInfo.timeLength > 0) {
+        savedDuration = Duration(seconds: videoPlayInfo.timeLength);
+        _videoAudioController.state.duration = savedDuration;
+        appLog("设置视频时长: ${_videoAudioController.state.duration}");
+      } else {
+        appLog("视频时长信息不可用或为零");
+      }
+      
+      // 刷新播放器
+      appLog("开始刷新播放器");
+      await _videoAudioController.refresh();
+      appLog("播放器刷新完成");
+      
+      // 如果播放器没有正确设置duration，使用我们手动设置的值
+      appLog("检查播放器时长设置: 当前时长=${_videoAudioController.state.duration.inMilliseconds}ms, 保存的时长=${savedDuration.inMilliseconds}ms");
+      if (_videoAudioController.state.duration.inMilliseconds == 0 && 
+          savedDuration.inMilliseconds > 0) {
+        _videoAudioController.state.duration = savedDuration;
+        appLog("重新设置视频时长: ${_videoAudioController.state.duration}");
+      }
+      
+      appLog("视频信息加载完成");
+      return true;
+    } catch (e, stackTrace) {
+      appLog("加载视频信息失败: $e");
+      appLog("错误堆栈: $stackTrace");
       return false;
     }
-    
-    // 设置视频时长（在刷新播放器之前设置）
-    if (videoPlayInfo != null && videoPlayInfo!.timeLength > 0) {
-      _videoAudioController.state.duration = Duration(seconds: videoPlayInfo!.timeLength);
-      log("设置视频时长: ${_videoAudioController.state.duration}");
-    }
-    
-    // 刷新播放器
-    await _videoAudioController.refresh();
-    
-    // 检查播放器是否出错
-    if (_videoAudioController.state.hasError) {
-      log("播放器初始化出错");
-      return false;
-    }
-    
-    return true;
   }
 
   // 添加pause方法

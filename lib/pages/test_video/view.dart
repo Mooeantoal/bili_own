@@ -10,6 +10,7 @@ import 'widgets/test_reply.dart';
 import 'widgets/test_video_player_panel.dart';
 import 'widgets/test_danmaku_panel.dart';
 import 'widgets/video_detail_page.dart';
+import 'widgets/log_viewer.dart'; // 导入日志查看器
 
 class TestVideoPage extends StatefulWidget {
   const TestVideoPage({Key? key}) : super(key: key);
@@ -70,6 +71,15 @@ class _TestVideoPageState extends State<TestVideoPage> {
             const SizedBox(height: 20),
             // 操作按钮区域
             _buildOperationButtons(),
+            const SizedBox(height: 20),
+            // 日志查看器按钮
+            ElevatedButton(
+              onPressed: () {
+                // 打开日志查看器
+                Get.to(() => const LogViewer());
+              },
+              child: const Text('查看应用日志'),
+            ),
             const SizedBox(height: 20),
             // 测试功能按钮
             ElevatedButton(

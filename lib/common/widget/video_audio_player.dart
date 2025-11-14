@@ -1,7 +1,7 @@
 import 'dart:async';
-import 'dart:developer';
 
 import 'package:bili_own/common/utils/index.dart';
+import 'package:bili_own/common/utils/log_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:media_kit/media_kit.dart';
 import 'package:media_kit_video/media_kit_video.dart';
@@ -27,6 +27,7 @@ class VideoAudioPlayer extends StatefulWidget {
 class _VideoAudioPlayerState extends State<VideoAudioPlayer> {
   @override
   void initState() {
+    appLog("初始化VideoAudioPlayer");
     Future.microtask(() async {
       await widget.controller.init();
       if (mounted) {
@@ -34,6 +35,7 @@ class _VideoAudioPlayerState extends State<VideoAudioPlayer> {
       }
     });
     super.initState();
+    appLog("VideoAudioPlayer初始化完成");
   }
 
   @override
@@ -132,6 +134,7 @@ class PlayersSingleton {
   }
 
   Future<void> init() async {
+    appLog("初始化PlayersSingleton");
     if (videoPlayer == null && audioPlayer == null && videoController == null) {
       // 添加超时机制，避免无限等待
       _isVideoReady = false;
@@ -155,18 +158,21 @@ class PlayersSingleton {
       int timeoutCount = 0;
       const int maxTimeout = 50; // 5秒超时 (50 * 100ms)
       
+      appLog("等待播放器准备就绪");
       await Future.doWhile(() async {
         await Future.delayed(const Duration(milliseconds: 100));
         timeoutCount++;
         
+        appLog("播放器准备状态: videoReady=$_isVideoReady, audioReady=$_isAudioReady");
         if (_isVideoReady && _isAudioReady) {
           isReady = true;
+          appLog("播放器准备就绪");
           return false;
         }
         
         // 超时检查
         if (timeoutCount >= maxTimeout) {
-          log("播放器初始化超时");
+          appLog("播放器初始化超时");
           return false;
         }
         
@@ -174,9 +180,10 @@ class PlayersSingleton {
       });
       
       if (!isReady) {
-        log("播放器初始化失败或超时");
+        appLog("播放器初始化失败或超时");
       }
     }
+    appLog("PlayersSingleton初始化完成");
   }
 
   Future<void> dispose() async {
@@ -199,7 +206,9 @@ class VideoAudioController {
     this.audioHeaders,
     this.autoWakelock = false,
     this.initStart = false,
-  });
+  }) {
+    appLog("初始化VideoAudioController: videoUrl=$videoUrl, audioUrl=$audioUrl, autoWakelock=$autoWakelock, initStart=$initStart");
+  }
   String videoUrl;
   String audioUrl;
   final Map<String, String>? videoHeaders;
@@ -215,8 +224,9 @@ class VideoAudioController {
   final List<Function(Duration position)> _seekToListeners = [];
 
   Future<void> init() async {
+    appLog("初始化VideoAudioController");
     if (_initialized) {
-      log('当前播放器控制器已经初始化过了');
+      appLog('当前播放器控制器已经初始化过了');
       return;
     }
     //如果还没有播放器实例就创建
@@ -228,23 +238,22 @@ class VideoAudioController {
     //每初始化一次计数就加1
     PlayersSingleton().count++;
     
-    // 保存当前的时长设置，避免在refresh中被覆盖
-    final savedDuration = state.duration;
+    // 不再保存和恢复duration，因为这会在外部设置duration时产生冲突
+    appLog("开始刷新播放器");
     await refresh();
-    // 如果之前设置了时长且不为零，则恢复它
-    if (savedDuration.inMilliseconds > 0) {
-      state.duration = savedDuration;
-    }
+    appLog("播放器刷新完成");
     
     if (initStart) {
       await play();
     }
     _initialized = true;
+    appLog("VideoAudioController初始化完成");
   }
 
   // 刷新播放器数据
   // 如果还需要换音视频源的话，还需要在调用前改变videoUrl,audioUrl
   Future<void> refresh() async {
+    appLog("开始刷新播放器数据");
     //重置几个值，确保状态正确
     state.isEnd = false;
     state.isBuffering = false;
@@ -260,7 +269,7 @@ class VideoAudioController {
     
     //检查播放器是否为空
     if (videoPlayer == null || audioPlayer == null) {
-      log("videoPlayer or audioPlayer is null");
+      appLog("videoPlayer or audioPlayer is null");
       return;
     }
     
@@ -288,38 +297,38 @@ class VideoAudioController {
     //打开当前链接
     // 只有当videoUrl不为空时才打开视频播放器
     if (videoUrl.isNotEmpty) {
-      log("打开视频播放器，URL: $videoUrl");
+      appLog("打开视频播放器，URL: $videoUrl");
       try {
         await videoPlayer.open(Media(videoUrl), play: false);
       } catch (e) {
-        log("打开视频播放器失败: $e");
+        appLog("打开视频播放器失败: $e");
         state.hasError = true;
         // 发送状态变化通知
         _callStateChangeListeners();
         return;
       }
     } else {
-      log("视频URL为空，不打开视频播放器");
+      appLog("视频URL为空，不打开视频播放器");
     }
     // 只有当audioUrl不为空时才打开音频播放器
     if (audioUrl.isNotEmpty) {
-      log("打开音频播放器，URL: $audioUrl");
+      appLog("打开音频播放器，URL: $audioUrl");
       try {
         await audioPlayer.open(Media(audioUrl), play: false);
       } catch (e) {
-        log("打开音频播放器失败: $e");
+        appLog("打开音频播放器失败: $e");
         state.hasError = true;
         // 发送状态变化通知
         _callStateChangeListeners();
         return;
       }
     } else {
-      log("音频URL为空，不打开音频播放器");
+      appLog("音频URL为空，不打开音频播放器");
     }
     
     // 视频缓冲监听
     PlayersSingleton().videoBufferingListen!.onData((event) async {
-      log('videoBuffering: $event');
+      appLog('videoBuffering: $event');
       //如果视频变为缓冲状态，而声音在播放时且不为缓冲时，暂停声音
       if (event && audioPlayer.state.playing && !audioPlayer.state.buffering) {
         await audioPlayer.pause();
@@ -343,13 +352,13 @@ class VideoAudioController {
     // 以音频为准，同步视频
     // 进度监听
     PlayersSingleton().audioPositionListen!.onData((event) async {
-      log('audio position: $event');
+      appLog('audio position: $event');
       if (state.isEnd) return;
       state.position = event >= Duration.zero ? event : Duration.zero;
       var delta = audioPlayer.state.position.inMilliseconds -
           videoPlayer.state.position.inMilliseconds;
       if (delta >= audioPlayer.state.duration.inMilliseconds) delta = 0;
-      log('position delta: $delta');
+      appLog('position delta: $delta');
       if (delta > -18 && delta < 18) {
         if (state.speed != videoPlayer.state.rate) {
           await videoPlayer.setRate(state.speed);
@@ -372,7 +381,7 @@ class VideoAudioController {
     
     // 播放监听
     PlayersSingleton().audioPlayingListen!.onData((event) async {
-      log('audio playing: $event');
+      appLog('audio playing: $event');
       if (!state.isBuffering) {
         state.isPlaying = event;
       }
@@ -381,7 +390,7 @@ class VideoAudioController {
     
     // 缓冲状态
     PlayersSingleton().audioBufferingListen!.onData((event) async {
-      log('audio buffering: $event');
+      appLog('audio buffering: $event');
       state.isBuffering = event;
       // 声音变为缓冲状态而视频没在缓冲且在播放则暂停视频
       if (event && !videoPlayer.state.buffering && videoPlayer.state.playing) {
@@ -402,7 +411,7 @@ class VideoAudioController {
     });
     
     PlayersSingleton().audioCompletedListen!.onData((event) async {
-      log('audio complete: $event');
+      appLog('audio complete: $event');
       if (event) {
         await videoPlayer.seek(audioPlayer.state.position);
       }
@@ -433,8 +442,10 @@ class VideoAudioController {
         .audioDurationListen!
         .onData((event) {
           // 只有当时长不为零时才更新，避免覆盖手动设置的时长
-          if (event.inMilliseconds > 0) {
+          // 但如果手动设置的时长也是零，则允许更新
+          if (event.inMilliseconds > 0 || state.duration.inMilliseconds == 0) {
             state.duration = event;
+            appLog("更新音频时长: $event");
           }
         });
     //宽高监听
@@ -449,7 +460,7 @@ class VideoAudioController {
       state.isBuffering = false;
 
       Timer(const Duration(milliseconds: 600), () async {
-        log('seek to position: $lastPosition');
+        appLog('seek to position: $lastPosition');
         await audioPlayer.pause();
         await videoPlayer.pause();
         if (lastPosition.inMilliseconds < state.duration.inMilliseconds) {
@@ -466,6 +477,7 @@ class VideoAudioController {
         }
       });
     }
+    appLog("播放器数据刷新完成");
   }
 
   void autoWakelockCallback(VideoAudioState value) {
@@ -485,7 +497,7 @@ class VideoAudioController {
     if (state.isEnd) {
       state.isEnd = false;
       state.isBuffering = false;
-      log('seek to zero');
+      appLog('seek to zero');
       if (PlayersSingleton().audioPlayer != null) {
         await PlayersSingleton().audioPlayer!.pause();
       }

@@ -2,6 +2,7 @@ import 'package:bili_own/common/utils/bili_own_storage.dart';
 import 'package:bili_own/common/utils/http_utils.dart';
 import 'package:bili_own/common/utils/settings.dart';
 import 'package:bili_own/common/utils/download_service.dart';
+import 'package:bili_own/common/utils/log_utils.dart'; // 添加日志工具导入
 import 'package:bili_own/pages/main/index.dart';
 import 'package:dynamic_color/dynamic_color.dart';
 import 'package:flutter/material.dart';
@@ -13,7 +14,16 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   MediaKit.ensureInitialized();
   await BiliOwnStorage.ensureInitialized();
+  
+  // 初始化日志系统
+  await LogUtils().init();
+  appLog("应用启动");
+  
   runApp(const MyApp());
+  
+  // 应用退出时的回调
+  WidgetsBinding.instance.addObserver(AppLifecycleObserver());
+  
   //状态栏、导航栏沉浸
   SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
   SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
@@ -24,8 +34,22 @@ void main() async {
   ));
 }
 
+// 应用生命周期观察者
+class AppLifecycleObserver extends WidgetsBindingObserver {
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    super.didChangeAppLifecycleState(state);
+    if (state == AppLifecycleState.detached) {
+      // 应用即将退出，关闭日志系统
+      LogUtils().close();
+      appLog("应用退出");
+    }
+  }
+}
+
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
+  
   @override
   Widget build(BuildContext context) {
     return DynamicColorBuilder(builder: ((lightDynamic, darkDynamic) {
