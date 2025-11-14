@@ -31,18 +31,20 @@ class TestVideoPlayerWidget extends StatefulWidget {
 
 class _TestVideoPlayerWidgetState extends State<TestVideoPlayerWidget> {
   late TestVideoPlayerController _controller;
+  late Future<bool> _loadVideoFuture;
 
   @override
   void initState() {
     super.initState();
     _controller = TestVideoPlayerController(widget.autoPlay);
-    // 在initState中不调用initPlayer，而是在FutureBuilder中处理
+    // 初始化Future，避免重复调用
+    _loadVideoFuture = _controller.loadVideoInfo(widget.bvid, widget.cid);
   }
 
   @override
   Widget build(BuildContext context) {
     return FutureBuilder<bool>(
-      future: _controller.loadVideoInfo(widget.bvid, widget.cid),
+      future: _loadVideoFuture,
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const Center(child: CircularProgressIndicator());
@@ -55,7 +57,9 @@ class _TestVideoPlayerWidgetState extends State<TestVideoPlayerWidget> {
                 ElevatedButton(
                   onPressed: () {
                     // 重新加载
-                    setState(() {});
+                    setState(() {
+                      _loadVideoFuture = _controller.loadVideoInfo(widget.bvid, widget.cid);
+                    });
                   },
                   child: const Text('重新加载'),
                 ),
@@ -71,7 +75,9 @@ class _TestVideoPlayerWidgetState extends State<TestVideoPlayerWidget> {
                 ElevatedButton(
                   onPressed: () {
                     // 重新加载
-                    setState(() {});
+                    setState(() {
+                      _loadVideoFuture = _controller.loadVideoInfo(widget.bvid, widget.cid);
+                    });
                   },
                   child: const Text('重新加载'),
                 ),
@@ -273,15 +279,22 @@ class TestVideoPlayerController {
           lastPlayCid: response.data?.lastPlayCid ?? 0,
           lastPlayTime: Duration(milliseconds: response.data?.lastPlayTime ?? 0));
           
-      log("获取到视频播放信息: videos=${videoPlayInfo?.videos.length}, audios=${videoPlayInfo?.audios.length}");
+      log("获取到视频播放信息: videos=${videoPlayInfo?.videos.length}, audios=${videoPlayInfo?.audios.length}, duration=${videoPlayInfo?.timeLength}");
     } catch (e, stackTrace) {
       log("bili_video_player.loadVideo:$e");
       log("错误堆栈: $stackTrace");
+      // 即使出现异常，也要确保返回false
       return false;
     }
     
     if (videoPlayInfo == null || (videoPlayInfo!.videos.isEmpty && videoPlayInfo!.audios.isEmpty)) {
       log("bili_video_player.loadVideo: videoPlayInfo is null or both videos and audios are empty");
+      // 添加更详细的日志信息
+      if (videoPlayInfo == null) {
+        log("videoPlayInfo为null");
+      } else {
+        log("videos长度: ${videoPlayInfo!.videos.length}, audios长度: ${videoPlayInfo!.audios.length}");
+      }
       return false;
     }
     
@@ -319,8 +332,26 @@ class TestVideoPlayerController {
     log("设置视频URL: $videoUrl");
     log("设置音频URL: $audioUrl");
     
+    // 检查URL是否为空
+    if (videoUrl.isEmpty && audioUrl.isEmpty) {
+      log("警告: 视频和音频URL都为空");
+      return false;
+    }
+    
+    // 设置视频时长（在刷新播放器之前设置）
+    if (videoPlayInfo != null && videoPlayInfo!.timeLength > 0) {
+      _videoAudioController.state.duration = Duration(seconds: videoPlayInfo!.timeLength);
+      log("设置视频时长: ${_videoAudioController.state.duration}");
+    }
+    
     // 刷新播放器
     await _videoAudioController.refresh();
+    
+    // 检查播放器是否出错
+    if (_videoAudioController.state.hasError) {
+      log("播放器初始化出错");
+      return false;
+    }
     
     return true;
   }

@@ -1,4 +1,5 @@
 // 测试视频播放器面板，用于移植bilimiao项目的播放器控制面板功能
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:bili_own/common/utils/string_format_utils.dart';
@@ -18,6 +19,25 @@ class TestVideoPlayerPanel extends StatefulWidget {
 }
 
 class _TestVideoPlayerPanelState extends State<TestVideoPlayerPanel> {
+  late Timer _timer;
+  
+  @override
+  void initState() {
+    super.initState();
+    // 定期更新UI以确保进度条能正确显示
+    _timer = Timer.periodic(const Duration(milliseconds: 500), (timer) {
+      if (mounted) {
+        setState(() {});
+      }
+    });
+  }
+  
+  @override
+  void dispose() {
+    _timer.cancel();
+    super.dispose();
+  }
+  
   @override
   Widget build(BuildContext context) {
     return Container(

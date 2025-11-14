@@ -133,6 +133,10 @@ class PlayersSingleton {
 
   Future<void> init() async {
     if (videoPlayer == null && audioPlayer == null && videoController == null) {
+      // 添加超时机制，避免无限等待
+      _isVideoReady = false;
+      _isAudioReady = false;
+      
       videoPlayer = Player(
           configuration: PlayerConfiguration(
         ready: () => _isVideoReady = true,
@@ -145,13 +149,33 @@ class PlayersSingleton {
       initSubscriptions();
       // 显示的是视频
       videoController = VideoController(videoPlayer!);
+      
+      // 添加超时检查，避免无限等待
+      bool isReady = false;
+      int timeoutCount = 0;
+      const int maxTimeout = 50; // 5秒超时 (50 * 100ms)
+      
       await Future.doWhile(() async {
         await Future.delayed(const Duration(milliseconds: 100));
+        timeoutCount++;
+        
         if (_isVideoReady && _isAudioReady) {
+          isReady = true;
           return false;
         }
+        
+        // 超时检查
+        if (timeoutCount >= maxTimeout) {
+          log("播放器初始化超时");
+          return false;
+        }
+        
         return true;
       });
+      
+      if (!isReady) {
+        log("播放器初始化失败或超时");
+      }
     }
   }
 
@@ -203,7 +227,15 @@ class VideoAudioController {
     }
     //每初始化一次计数就加1
     PlayersSingleton().count++;
+    
+    // 保存当前的时长设置，避免在refresh中被覆盖
+    final savedDuration = state.duration;
     await refresh();
+    // 如果之前设置了时长且不为零，则恢复它
+    if (savedDuration.inMilliseconds > 0) {
+      state.duration = savedDuration;
+    }
+    
     if (initStart) {
       await play();
     }
@@ -213,7 +245,7 @@ class VideoAudioController {
   // 刷新播放器数据
   // 如果还需要换音视频源的话，还需要在调用前改变videoUrl,audioUrl
   Future<void> refresh() async {
-    //重置几个值
+    //重置几个值，确保状态正确
     state.isEnd = false;
     state.isBuffering = false;
     state.buffered = Duration.zero;
@@ -257,14 +289,30 @@ class VideoAudioController {
     // 只有当videoUrl不为空时才打开视频播放器
     if (videoUrl.isNotEmpty) {
       log("打开视频播放器，URL: $videoUrl");
-      await videoPlayer.open(Media(videoUrl), play: false);
+      try {
+        await videoPlayer.open(Media(videoUrl), play: false);
+      } catch (e) {
+        log("打开视频播放器失败: $e");
+        state.hasError = true;
+        // 发送状态变化通知
+        _callStateChangeListeners();
+        return;
+      }
     } else {
       log("视频URL为空，不打开视频播放器");
     }
     // 只有当audioUrl不为空时才打开音频播放器
     if (audioUrl.isNotEmpty) {
       log("打开音频播放器，URL: $audioUrl");
-      await audioPlayer.open(Media(audioUrl), play: false);
+      try {
+        await audioPlayer.open(Media(audioUrl), play: false);
+      } catch (e) {
+        log("打开音频播放器失败: $e");
+        state.hasError = true;
+        // 发送状态变化通知
+        _callStateChangeListeners();
+        return;
+      }
     } else {
       log("音频URL为空，不打开音频播放器");
     }
@@ -375,11 +423,20 @@ class VideoAudioController {
     // 错误监听
     PlayersSingleton()
         .audioErrorListen!
-        .onData((event) => state.hasError = event.code == 0);
+        .onData((event) {
+          state.hasError = event.code == 0;
+          // 发送状态变化通知
+          _callStateChangeListeners();
+        });
     // 时长监听
     PlayersSingleton()
         .audioDurationListen!
-        .onData((event) => state.duration = event);
+        .onData((event) {
+          // 只有当时长不为零时才更新，避免覆盖手动设置的时长
+          if (event.inMilliseconds > 0) {
+            state.duration = event;
+          }
+        });
     //宽高监听
     PlayersSingleton().videoWidthListen!.onData((event) => state.width = event ?? 0);
     PlayersSingleton()

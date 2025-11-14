@@ -24,13 +24,19 @@ class HttpUtils {
         'user-agent': ApiConstants.userAgent,
         'Accept-Encoding': 'gzip'
       },
-      connectTimeout: const Duration(seconds: 5),
-      receiveTimeout: const Duration(seconds: 5),
+      connectTimeout: const Duration(seconds: 15),
+      receiveTimeout: const Duration(seconds: 15),
       contentType: Headers.jsonContentType,
       persistentConnection: true,
+      extra: {
+        "retry": 3,
+        "retryInterval": 1000,
+      }
     );
     dio = Dio(options);
     dio.transformer = BackgroundTransformer();
+    
+    dio.interceptors.add(RetryInterceptor());
 
     // 添加error拦截器
     dio.interceptors.add(ErrorInterceptor());
@@ -98,6 +104,55 @@ class HttpUtils {
   }
 }
 
+/// 重试拦截器
+class RetryInterceptor extends Interceptor {
+  @override
+  Future<void> onError(DioError err, ErrorInterceptorHandler handler) async {
+    // 获取重试次数和间隔
+    int retryCount = err.requestOptions.extra['retry'] ?? 0;
+    int retryInterval = err.requestOptions.extra['retryInterval'] ?? 1000;
+    
+    // 如果还有重试次数且是网络相关错误，则重试
+    if (retryCount > 0 && 
+        (err.type == DioErrorType.connectionTimeout || 
+         err.type == DioErrorType.receiveTimeout || 
+         err.type == DioErrorType.unknown)) {
+      
+      // 减少重试次数
+      err.requestOptions.extra['retry'] = retryCount - 1;
+      
+      // 等待一段时间后重试
+      await Future.delayed(Duration(milliseconds: retryInterval));
+      
+      try {
+        // 重试请求
+        final response = await HttpUtils.dio.request(
+          err.requestOptions.path,
+          data: err.requestOptions.data,
+          queryParameters: err.requestOptions.queryParameters,
+          cancelToken: err.requestOptions.cancelToken,
+          options: Options(
+            method: err.requestOptions.method,
+            headers: err.requestOptions.headers,
+            extra: err.requestOptions.extra,
+            contentType: err.requestOptions.contentType,
+            responseType: err.requestOptions.responseType,
+            receiveTimeout: err.requestOptions.receiveTimeout,
+            sendTimeout: err.requestOptions.sendTimeout,
+          ),
+        );
+        return handler.resolve(response);
+      } catch (e) {
+        // 如果重试也失败，继续传递错误
+        return handler.next(err);
+      }
+    }
+    
+    // 不需要重试的情况，继续传递错误
+    return handler.next(err);
+  }
+}
+
 /// 错误处理拦截器
 class ErrorInterceptor extends Interceptor {
   // 是否有网
@@ -109,36 +164,11 @@ class ErrorInterceptor extends Interceptor {
   @override
   Future<void> onError(DioError err, ErrorInterceptorHandler handler) async {
     switch (err.type) {
-      // case DioErrorType.badCertificate:
-      //   Get.rawSnackbar(message: 'bad certificate');
-      //   break;
-      // case DioErrorType.badResponse:
-      //   Get.rawSnackbar(message: 'bad response');
-      //   break;
-      // case DioErrorType.cancel:
-      //   Get.rawSnackbar(message: 'canceled');
-      //   break;
-      // case DioErrorType.connectionError:
-      //   Get.rawSnackbar(message: 'connection error');
-      //   break;
-      // case DioErrorType.connectionTimeout:
-      //   Get.rawSnackbar(message: 'connection timeout');
-      //   break;
-      // case DioErrorType.receiveTimeout:
-      //   Get.rawSnackbar(message: 'receive timeout');
-      //   break;
-      // case DioErrorType.sendTimeout:
-      //   Get.rawSnackbar(message: 'send timeout');
-      //   break;
       case DioErrorType.unknown:
         if (!await isConnected()) {
-          //网络未连接
           Get.rawSnackbar(title: '网络未连接 ', message: '请检查网络状态');
           handler.reject(err);
         }
-        // else {
-        //   Get.rawSnackbar(message: '未知网络错误');
-        // }
         break;
       default:
     }

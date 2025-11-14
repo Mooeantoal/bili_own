@@ -3,6 +3,7 @@ import 'package:bili_own/common/models/network/video_play/video_play.dart';
 import 'package:bili_own/common/models/network/proto/danmaku/danmaku.pb.dart';
 import 'package:bili_own/common/models/network/reply/reply.dart';
 import 'package:bili_own/common/utils/http_utils.dart';
+import 'package:bili_own/common/utils/cookie_util.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 
@@ -28,6 +29,8 @@ class PlayerApi {
           'type': '',
           'otype': 'json',
           if (fnval > 2) 'fourk': 1,
+          // 添加认证参数
+          'access_key': await CookieUtils.getCsrf() ?? '',
         },
         options: Options(
           headers: {
